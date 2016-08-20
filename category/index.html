@@ -58,88 +58,44 @@
 
     <div class='article'>
         <div class="content-title">
-            <a href="/category/线程.html"><h1>线程</h1></a>
-四 18 四月 2013
+            <a href="/category/build-blog-system-by-pelican.html"><h1>Pelican+Github</h1></a>
+二 07 十月 2014
 
-by <a class="url fn" href="/author/tuyc.html">tuyc</a>
+by <a class="url fn" href="/author/joey-huang.html">Joey Huang</a>
  
 
 
  
         </div>
         
-        <div><p>使用线程池的好处<br />
+        <div></div>
+        <hr />
+    </div>
+		
+
+ 
+        
+
+ 
+
+    <div class='article'>
+        <a href="/category/线程.html"><h2>线程</h2></a>
+        <div class= "well small"> 四 18 四月 2013
+
+by <a class="url fn" href="/author/tuyc.html">tuyc</a>
+ 
+
+
+ </div>
+        <div class="summary"><p>使用线程池的好处<br />
 1.可以重复利用存在的线程，减少系统的开销<br />
 2.利用线程池可以执行定时、并发数的控制</p>
 <p>一、 获取线程池的三种方法<br />
 　　1. ExecutorService pool = Executors.newFixedThreadPool　创建一个可重用固定线程数的线程池，以共享的无界队列方式来运行这些线程。<code>如何所有线程都在活动状态，这时提交附加任务，附加任务将在队列等待。</code>如果在关闭前的执行期间由于失败而导致任何线程终止，那么一个新线程将代替它执行后续的任务（如果需要（传参决定））；  <code>定长线程池的大小最好根据系统资源进行设置。如Runtime.getRuntime().availableProcessors()。</code><br />
 　　2、ExecutorService pool=Executors.newSingleThreadExecutor
-创建一个使用单个 worker 线程的 Executor，以无界队列方式来运行该线程。（注意，如果因为在关闭前的执行期间出现失败而终止了此单个线程，那么如果需要，一个新线程将代替它执行后续的任务）。<code>可保证顺序地执行各个任务</code>，并且在任意给定的时间不会有多个线程是活动的。与其他等效的 newFixedThreadPool(1) 不同，可保证无需重新配置此方法所返回的执行程序即可使用其他的线程。<code>现行大多数GUI程序都是单线程的。Android中单线程可用于数据库操作，文件操作，应用批量安装，应用批量删除等不适合并发但可能IO阻塞性及影响UI线程响应的操作。</code><br />
-　　3、ExecutorService pool = Executors.newCachedThreadPool
-<code>创建一个可根据需要创建新线程的线程池</code>，但是在以前构造的线程可用时将重用它们。对于执行很多短期异步任务的程序而言，这些线程池通常可提高程序性能。调用 execute 将重用以前构造的线程（如果线程可用）。<code>如果现有线程没有可用的，则创建一个新线程并添加到池中。</code>终止并从缓存中移除那些已有 60 秒钟未被使用的线程。因此，长时间保持空闲的线程池不会使用任何资源。注意，可以使用 ThreadPoolExecutor 构造方法创建具有类似属性但细节不同（例如超时参数）的线程池。  <br />
-　　4、ExecutorService pool = Executors.
-newScheduledThreadPool <code>创建一个定长线程池，支持定时及周期性任务执行。</code>  例如：<br />
-   1. 创建一个定长线程池，支持定时及周期性任务执行    </p>
-<div class="highlight"><pre><span></span>   ScheduledExecutorService scheduledThreadPool = Executors.newScheduledThreadPool(5);  
-scheduledThreadPool.schedule(new Runnable() {
-  @Override
-  public void run() {
-    System.out.println(&quot;delay 3 seconds&quot;);
-  }  
-}, 3, TimeUnit.SECONDS);
-</pre></div>
-
-
-<p>表示延迟3秒执行。<br />
-  定期执行示例代码如下：</p>
-<div class="highlight"><pre><span></span> scheduledThreadPool.scheduleAtFixedRate(new Runnable() {
-     @Override
-     public void run() {
-        System.out.println(&quot;delay 1 seconds, and excute every 3 seconds&quot;);
-     }  
-}, 1, 3, TimeUnit.SECONDS);
-</pre></div>
-
-
-<p>表示延迟1秒后每3秒执行一次。ScheduledExecutorService比Timer更安全，功能更强大。</p>
-<p>二、线程池类 java.util.concurrent.ThreadPoolExecutor讲解</p>
-<p>ThreadPoolExecutor(int corePoolSize, int maximumPoolSize,long keepAliveTime, TimeUnit unit,BlockingQueue workQueue,RejectedExecutionHandler handler)</p>
-<p>参数说明</p>
-<p>corePoolSize： <code>线程池维护线程的最少数量</code><br />
-maximumPoolSize：<code>线程池维护线程的最大数量</code><br />
-keepAliveTime： 线程池维护线程所允许的空闲时间<br />
-unit： 线程池维护线程所允许的空闲时间的单位<br />
-workQueue： 线程池所使用的缓冲队列<br />
-handler： 线程池对拒绝任务的处理策略</p>
-<p>线程创建规则</p>
-<p>一个任务通过 execute(Runnable)方法被添加到线程池，任务就是一个 Runnable类型的对象，任务的执行方法就是 Runnable类型对象的run()方法。<br />
-当一个任务通过execute(Runnable)方法欲添加到线程池时：<br />
-l  <code>如果此时线程池中的数量小于corePoolSize，即使线程池中的线程都处于空闲状态，也要创建新的线程来处理被添加的任务。</code><br />
-2  如果此时线程池中的数量等于 corePoolSize，但是缓冲队列 workQueue未满，那么任务被放入缓冲队列。<br />
-3  如果此时线程池中的数量大于corePoolSize，缓冲队列workQueue满，并且线程池中的数量小于maximumPoolSize，建新的线程来处理被添加的任务。<br />
-4  如果此时线程池中的数量大于corePoolSize，缓冲队列workQueue满，并且线程池中的数量等于maximumPoolSize，那么通过 handler所指定的策略来处理此任务。也就是：<code>处理任务的优先级为：核心线程corePoolSize、任务队列workQueue、最大线程maximumPoolSize，如果三者都满了，使用handler处理被拒绝的任务。</code><br />
-5  <code>当线程池中的线程数量大于 corePoolSize时，如果某线程空闲时间超过keepAliveTime，线程将被终止。这样，线程池可以动态的调整池中的线程数。</code></p>
-<p>核心和最大池大小</p>
-<p>ThreadPoolExecutor 将根据 corePoolSize（参见 getCorePoolSize()）和 maximumPoolSize（参见 getMaximumPoolSize()）设置的边界自动调整池大小。当新任务在方法execute(java.lang.Runnable) 中提交时，如果运行的线程少于 corePoolSize，则创建新线程来处理请求，即使其他辅助线程是空闲的。如果运行的线程多于 corePoolSize 而少于 maximumPoolSize，则仅当队列满时才创建新线程。如果设置的 corePoolSize 和 maximumPoolSize 相同，则创建了固定大小的线程池。如果将 maximumPoolSize 设置为基本的无界值（如 Integer.MAX_VALUE），则允许池适应任意数量的并发任务。在大多数情况下，核心和最大池大小仅基于构造来设置，不过也可以使用setCorePoolSize(int) 和 setMaximumPoolSize(int) 进行动态更改。</p>
-<p>创建新线程</p>
-<p>使用 ThreadFactory 创建新线程。<code>如果没有另外说明，则在同一个 ThreadGroup 中一律使用 Executors.defaultThreadFactory() 创建线程，并且这些线程具有相同的NORM_PRIORITY 优先级和非守护进程状态。</code>通过提供不同的 ThreadFactory，可以改变线程的名称、线程组、优先级、守护进程状态，等等。如果从 newThread 返回null 时 ThreadFactory 未能创建线程，则执行程序将继续运行，但不能执行任何任务。如果池中当前有多于 corePoolSize 的线程，则这些多出的线程在空闲时间超过 keepAliveTime 时将会终止（参见 getKeepAliveTime(java.util.concurrent.TimeUnit)）。这提供了当池处于非活动状态时减少资源消耗的方法。如果池后来变得更为活动，则可以创建新的线程。也可以使用方法 setKeepAliveTime(long, java.util.concurrent.TimeUnit) 动态地更改此参数。使用 Long.MAX_VALUE TimeUnit.NANOSECONDS 的值在关闭前有效地从以前的终止状态禁用空闲线程。</p>
-<p>排队</p>
-<p>所有 BlockingQueue 都可用于传输和保持提交的任务。可以使用此队列与池大小进行交互：
-A. 如果运行的线程少于 corePoolSize，则 Executor 始终首选添加新的线程，而不进行排队。
-B. 如果运行的线程等于或多于 corePoolSize，则 Executor 始终首选将请求加入队列，而不添加新的线程。
-C. 如果无法将请求加入队列，则创建新的线程，除非创建此线程超出 maximumPoolSize，在这种情况下，任务将被拒绝。</p>
-<p>execute()执行</p>
-<p>execute()方法中，调用了三个私有方法
-addIfUnderCorePoolSize()：在线程池大小小于核心线程池大小的情况下，扩展线程池
-addIfUnderMaximumPoolSize()：在线程池大小小于线程池大小上限的情况下，扩展线程池
-ensureQueuedTaskHandled()：保证在线程池关闭的情况下，新加入队列的线程也能正确处理</p>
-<p>线程池的停止和关闭</p>
-<p><code>ThreadPoolExecutor提供了两个方法，用于线程池的关闭，分别是shutdown()和shutdownNow()，</code>其中：
-shutdown()：不会立即终止线程池，而是要等所有任务缓存队列中的任务都执行完后才终止，但再也不会接受新的任务
-shutdownNow()：立即终止线程池，并尝试打断正在执行的任务，并且清空任务缓存队列，返回尚未执行的任务</p></div>
-        <hr />
-    </div>
-		
+创建一个使用单个 worker 线程的 Executor，以无界队列方式来运行该线程。（注意，如果因为在关闭前的执行期间出现失败而终止了此单个线程，那么如果需要，一个新线程将代替它执行后续的任务）。<code>可保证顺序地执行各个任务</code>，并且在任意给定的时间不会有多个线程是活动的。与其他等效的 newFixedThreadPool(1) 不同，可保证无需重新配置此方法所返回的执行程序即可使用其他的线程。<code>现行大多数GUI程序都是单线程的。Android中单线程可用于数据库操作 ...</code></p> <a class="btn btn-info xsmall" href="/category/线程.html">read more</a></div>
+    </div>	
+				
 <div class="pagination">
 <ul>
     <li class="prev disabled"><a href="#">&larr; Previous</a></li>
@@ -216,7 +172,7 @@ shutdownNow()：立即终止线程池，并尝试打断正在执行的任务，�
     </div>     </div> 
 <footer>
 <br />
-<p><a href="">tuyc</a> &copy; tuyc 2013</p>
+<p><a href="">tuyc</a> &copy; tuyc 2014</p>
 </footer>
 
 </div> <!-- /container -->
