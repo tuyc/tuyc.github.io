@@ -58,132 +58,17 @@
 
     <div class='article'>
         <div class="content-title">
-            <a href="/misc/隐藏实施过程.html"><h1>隐藏实施过程</h1></a>
-四 18 四月 2013
+            <a href="/misc/build-blog-system-by-pelican.html"><h1>Pelican+Github</h1></a>
+二 07 十月 2014
 
-by <a class="url fn" href="/author/tuyc.html">tuyc</a>
+by <a class="url fn" href="/author/joey-huang.html">Joey Huang</a>
  
 
 
  
         </div>
         
-        <div><p>```
-//: Beetle.java
-// Thefull process of initialization.
-class Insect { 
-    int i = 9;
-    int j ;
-    Insect() {
-        prt("i =" +i +", j =" +j);
-        j = 39; 
-    }
-    static int x1 = prt("static Insect.x1 initialized") ;
-    static int prt(Strings) { 
-        System.out.println(s) ;
-        return 47;
-    } 
-}</p>
-<p>public class Beetleextends Insect { 
-    int k = prt("Beetle.k initialized"); 
-    Beetle() {
-        prt("k = " + k);
-        prt("j = " + j); 
-    }
-    static int x2 = prt("static Beetle.x2 initialized");
-    static int prt(Strings) { 
-        System.out.println(s) ;
-        return 63;
-    }
-    public static void main(String[] args) {
-        prt("Beetle construct or " ) ;
-        Beetleb = new Beetle( ); 
-    }
-} ///:~</p>
-<p>该程序的输出如下:
-static Insect.x initialized 
-staticBeetle.x initialized 
-Beetle construct or
-i = 9, j = 0
-Beetle.k initialized k = 63
-j = 39       </p>
-<div class="highlight"><pre><span></span>#6.类再生
-1. 合成与继承  
-在面向对象的程序设计中,创建和使用代码最可能采取的一种做法是:将数据和方法统一封装到一个类里, 并且使用那个类的对象。有些时候,需通过“合成”技术用现成的类来构造新类。而继承是最少见的一种做 法。因此,尽管继承在学习 OOP 的过程中得到了大量的强调,但并不意味着应该尽可能地到处使用它。相 反,使用它时要特别慎重。只有在清楚知道继承在所有方法中最有效的前提下,才可考虑它。为判断自己到 底应该选用合成还是继承,一个最简单的办法就是考虑是否需要从新类上溯造型回基础类。若必须上溯,就 需要继承。但如果不需要上溯造型,就应提醒自己防止继承的滥用。
-2. final关键字应用场合：数据、方法和类。  
-   + final数据  
-        + 常数  
-        1）编译期常数,它永远不会改变  
-        2）在运行期初始化的一个值,我们不希望它发生变化  
-        + 空白final  
-        Java 1. 1 允许我们创建“空白 f i nal ”,它们属于一些特殊的字段。尽管被声明成 f i nal ,但却未得到一个 初始值。无论在哪种情况下,空白 f i nal 都必须在实际使用前得到正确的初始化。而且编译器会主动保证这 一规定得以贯彻。  
-        现在强行要求我们对 f i nal 进行赋值处理——要么在定义字段时使用一个表达 式,要么在每个构建器中。这 样就可以确保final 字段在使用前获得正确的初始化。
-        + final 自变量  
-        Java 1. 1 允许我们将自变量设成 f i nal 属性,方法是在自变量列表中对它们进行适当的声明。这意味着在一 个方法的内部,我们不能改变自变量句柄指向的东西。如下所示:   
-void with(final Gizmog) {  
-        　　// ! g = new Gizmo(); / / I l l e g a l - - g i s f i n a l  
-        　　g.spin();   
-}         
-   + final 方法  
-   之所以要使用final 方法,可能是出于对两方面理由的考虑。  
-    1）第一个是为方法“上锁”,防止任何继承类改 变它的本来含义。  
-    2）第二个理由是程序执行的效率。  
-    解释2）：只要编译器发现一个final 方法调用,就会(根据它自己的判断)忽略为 执行方法调用机制而采取的常规代码插入方法(将自变量压入堆栈;跳至方法代码并执行它;跳回来;清除堆栈自变量;最后对返回值进行处理)。相反,它会用方法主体内实际代码的一个副本来替换方法调用。    
-    类内所有 pr i vat e方法都自动成为 f i nal 。由于我们不能访问一个 pr i vat e方法,所以它绝对不会被其他方 法覆盖(若强行这样做,编译器会给出错误提示)。
-    +  final 类  
-    如果说整个类都是 f i nal (在它的定义前冠以 f i nal 关键字),就表明自己不希望从这个类继承,或者不允 许其他任何人采取这种操作。换言之,出于这样或那样的原因,我们的类肯定不需要进行任何改变;或者出 于安全方面的理由,我们不希望进行子类化(子类处理)。    
-    除此以外,我们或许还考虑到执行效率的问题,并想确保涉及这个类各对象的所有行动都要尽可能地有效。  
-    一个 f i nal 类中的所有方法都默认为 f i nal 。因为此时再也无法覆盖它们。所 以与我们将一个方法明确声明为final 一样,编译器此时有相同的效率选择。 
-3. 继承初始化
-
-
- ```
-//: Beetle.java
-// Thefull process of initialization.
-class Insect { 
-    int i = 9;
-    int j ;
-    Insect() {
-        prt(&quot;i =&quot; +i +&quot;, j =&quot; +j);
-        j = 39; 
-    }
-    static int x1 = prt(&quot;static Insect.x1 initialized&quot;) ;
-    static int prt(Strings) { 
-        System.out.println(s) ;
-        return 47;
-    } 
-}
-
-public class Beetleextends Insect { 
-    int k = prt(&quot;Beetle.k initialized&quot;); 
-    Beetle() {
-        prt(&quot;k = &quot; + k);
-        prt(&quot;j = &quot; + j); 
-    }
-    static int x2 = prt(&quot;static Beetle.x2 initialized&quot;);
-    static int prt(Strings) { 
-        System.out.println(s) ;
-        return 63;
-    }
-    public static void main(String[] args) {
-        prt(&quot;Beetle construct or &quot; ) ;
-        Beetleb = new Beetle( ); 
-    }
-} ///:~
-
-
-该程序的输出如下:
-static Insect.x initialized 
-staticBeetle.x initialized 
-Beetle construct or
-i = 9, j = 0
-Beetle.k initialized k = 63
-j = 39       
-</pre></div>
-
-
-<p>对Beetl e运行Java时,发生的第一件事情是装载程序到外面找到那个类。在装载过程中,装载程序注意它 有一个基础类(即 ext ends 关键字要表达的意思),所以随之将其载入。无论是否准备生成那个基础类的一 个对象,这个过程都会发生(请试着将对象的创建代码当作注释标注出来,自己去证实)。 若基础类含有另一个基础类,则另一个基础类随即也会载入,以此类推。接下来,会在根基础类(此时是
-I ns ect )执行 s t at i c 初始化,再在下一个衍生类执行,以此类推。保证这个顺序是非常关键的,因为衍生类 的初始化可能要依赖于对基础类成员的正确初始化。 此时,必要的类已全部装载完毕,所以能够创建对象。首先,这个对象中的所有基本数据类型都会设成它们 的默认值,而将对象句柄设为 nul l 。随后会调用基础类构建器。在这种情况下,调用是自动进行的。但也完 全可以用 s uper 来自行指定构建器调用(就象在 Beet l e( ) 构建器中的第一个操作一样)。基础类的构建采用 与衍生类构建器完全相同的处理过程。基础顺构建器完成以后,实例变量会按本来的顺序得以初始化。最 后,执行构建器剩余的主体部分。</p></div>
+        <div></div>
         <hr />
     </div>
 		
@@ -225,7 +110,6 @@ I ns ect )执行 s t at i c 初始化,再在下一个衍生类执行,以此类�
                 Categories
                 </li>
                 
-                <li><a href="/category/index.html">category</a></li>
                 <li><a href="/misc/index.html">misc</a></li>
                    
             </ul>
@@ -263,7 +147,7 @@ I ns ect )执行 s t at i c 初始化,再在下一个衍生类执行,以此类�
     </div>     </div> 
 <footer>
 <br />
-<p><a href="">tuyc</a> &copy; tuyc 2013</p>
+<p><a href="">tuyc</a> &copy; tuyc 2014</p>
 </footer>
 
 </div> <!-- /container -->

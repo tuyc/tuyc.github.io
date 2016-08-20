@@ -58,7 +58,7 @@
 
     <div class='article'>
         <div class="content-title">
-            <a href="/category/build-blog-system-by-pelican.html"><h1>Pelican+Github</h1></a>
+            <a href="/misc/build-blog-system-by-pelican.html"><h1>Pelican+Github</h1></a>
 二 07 十月 2014
 
 by <a class="url fn" href="/author/joey-huang.html">Joey Huang</a>
@@ -72,66 +72,6 @@ by <a class="url fn" href="/author/joey-huang.html">Joey Huang</a>
         <hr />
     </div>
 		
-
- 
-        
-
- 
-
-    <div class='article'>
-        <a href="/category/线程.html"><h2>线程</h2></a>
-        <div class= "well small"> 四 18 四月 2013
-
-by <a class="url fn" href="/author/tuyc.html">tuyc</a>
- 
-
-
- </div>
-        <div class="summary"><p>使用线程池的好处<br />
-1.可以重复利用存在的线程，减少系统的开销<br />
-2.利用线程池可以执行定时、并发数的控制</p>
-<p>一、 获取线程池的三种方法<br />
-　　1. ExecutorService pool = Executors.newFixedThreadPool　创建一个可重用固定线程数的线程池，以共享的无界队列方式来运行这些线程。<code>如何所有线程都在活动状态，这时提交附加任务，附加任务将在队列等待。</code>如果在关闭前的执行期间由于失败而导致任何线程终止，那么一个新线程将代替它执行后续的任务（如果需要（传参决定））；  <code>定长线程池的大小最好根据系统资源进行设置。如Runtime.getRuntime().availableProcessors()。</code><br />
-　　2、ExecutorService pool=Executors.newSingleThreadExecutor
-创建一个使用单个 worker 线程的 Executor，以无界队列方式来运行该线程。（注意，如果因为在关闭前的执行期间出现失败而终止了此单个线程，那么如果需要，一个新线程将代替它执行后续的任务）。<code>可保证顺序地执行各个任务</code>，并且在任意给定的时间不会有多个线程是活动的。与其他等效的 newFixedThreadPool(1) 不同，可保证无需重新配置此方法所返回的执行程序即可使用其他的线程。<code>现行大多数GUI程序都是单线程的。Android中单线程可用于数据库操作 ...</code></p> <a class="btn btn-info xsmall" href="/category/线程.html">read more</a></div>
-    </div>	
-				
-
- 
-        
-
- 
-
-    <div class='article'>
-        <a href="/misc/隐藏实施过程.html"><h2>隐藏实施过程</h2></a>
-        <div class= "well small"> 四 18 四月 2013
-
-by <a class="url fn" href="/author/tuyc.html">tuyc</a>
- 
-
-
- </div>
-        <div class="summary"><p>```
-//: Beetle.java
-// Thefull process of initialization.
-class Insect { 
-    int i = 9;
-    int j ;
-    Insect() {
-        prt("i =" +i +", j =" +j);
-        j = 39; 
-    }
-    static int x1 = prt("static Insect.x1 initialized") ;
-    static int prt(Strings) { 
-        System.out.println(s) ;
-        return 47;
-    } 
-}</p>
-<p>public class Beetleextends Insect { 
-    int k = prt("Beetle.k initialized"); 
-    Beetle ...</p> <a class="btn btn-info xsmall" href="/misc/隐藏实施过程.html">read more</a></div>
-    </div>	
-				
 <div class="pagination">
 <ul>
     <li class="prev disabled"><a href="#">&larr; Previous</a></li>
@@ -170,7 +110,6 @@ class Insect {
                 Categories
                 </li>
                 
-                <li><a href="/category/index.html">category</a></li>
                 <li><a href="/misc/index.html">misc</a></li>
                    
             </ul>
