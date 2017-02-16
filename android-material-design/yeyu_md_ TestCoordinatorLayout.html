@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>tuyc - TestCoordinatorLayout相关控件使用姿势</title>
+    <meta name="description" content="">
+    <meta name="author" content="tuyc">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+    <script src="/theme/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/theme/bootstrap.min.css" rel="stylesheet">
+    <link href="/theme/bootstrap.min.responsive.css" rel="stylesheet">
+    <link href="/theme/local.css" rel="stylesheet">
+    <link href="/theme/pygments.css" rel="stylesheet">
+
+    <!-- So Firefox can bookmark->"abo this site" -->
+
+</head>
+
+<body>
+
+<div class="navbar">
+    <div class="navbar-inner">
+    <div class="container">
+
+         <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+             <span class="icon-bar"></span>
+             <span class="icon-bar"></span>
+             <span class="icon-bar"></span>
+         </a>
+
+        <a class="brand" href="">tuyc</a>
+
+        <div class="nav-collapse">
+        <ul class="nav">
+            
+        </ul>
+        </div>
+        
+    </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="content">
+    <div class="row">
+
+        <div class="span9">
+    <div class='article'>
+        <div class="content-title">
+            <h1>TestCoordinatorLayout相关控件使用姿势</h1>
+六 10 十二月 2016
+
+by <a class="url fn" href="/author/tuyc.html">tuyc</a>
+ 
+
+
+        </div>
+	
+        <div><p>[TOC]</p>
+<h2>TestCoordinatorLayout分析</h2>
+<p><a href="https://github.com/SpikeKing/TestCoordinatorLayout">github地址：https://github.com/SpikeKing/TestCoordinatorLayout</a></p>
+<p><a href="http://www.wangchenlong.org/2016/03/22/1603/228-coordinator-layout-first/">源码解析示例</a></p>
+<h5>本文只对该项目所用到的控件使用方式关系到的知识点进行整合</h5>
+<h3>效果图</h3>
+<p><img alt="" src="https://github.com/tuyc/tuyc.github.io/blob/master/images/animation/animation_testcoordinatorlayout.gif?raw=true" /></p>
+<h3>主要文件和源码</h3>
+<ul>
+<li>MainActivity.java</li>
+<li>AvatarImageBehavior.java</li>
+<li>activity_main.xml</li>
+</ul>
+<h4>MainActivity.java</h4>
+<div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nn">spikeking.github.com.testcoordinatorlayout</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">android.os.Bundle</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">android.support.design.widget.AppBarLayout</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">android.support.design.widget.CollapsingToolbarLayout</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">android.support.v7.app.AppCompatActivity</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">android.support.v7.widget.Toolbar</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">android.view.Menu</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">android.view.MenuItem</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">android.view.View</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">android.view.animation.AlphaAnimation</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">android.widget.FrameLayout</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">android.widget.ImageView</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">android.widget.LinearLayout</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">android.widget.TextView</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">butterknife.Bind</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">butterknife.ButterKnife</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MainActivity</span> <span class="kd">extends</span> <span class="n">AppCompatActivity</span> <span class="o">{</span>
+
+    <span class="c1">// 控制ToolBar的变量</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">float</span> <span class="n">PERCENTAGE_TO_SHOW_TITLE_AT_TOOLBAR</span> <span class="o">=</span> <span class="mf">0.9f</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">float</span> <span class="n">PERCENTAGE_TO_HIDE_TITLE_DETAILS</span> <span class="o">=</span> <span class="mf">0.3f</span><span class="o">;</span>
+
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">ALPHA_ANIMATIONS_DURATION</span> <span class="o">=</span> <span class="mi">200</span><span class="o">;</span>
+
+    <span class="kd">private</span> <span class="kt">boolean</span> <span class="n">mIsTheTitleVisible</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kt">boolean</span> <span class="n">mIsTheTitleContainerVisible</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+
+    <span class="nd">@Bind</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">main_iv_placeholder</span><span class="o">)</span>
+    <span class="n">ImageView</span> <span class="n">mIvPlaceholder</span><span class="o">;</span> <span class="c1">// 大图片</span>
+
+    <span class="nd">@Bind</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">main_ll_title_container</span><span class="o">)</span>
+    <span class="n">LinearLayout</span> <span class="n">mLlTitleContainer</span><span class="o">;</span> <span class="c1">// Title的LinearLayout</span>
+
+    <span class="nd">@Bind</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">main_fl_title</span><span class="o">)</span>
+    <span class="n">FrameLayout</span> <span class="n">mFlTitleContainer</span><span class="o">;</span> <span class="c1">// Title的FrameLayout</span>
+
+    <span class="nd">@Bind</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">main_abl_app_bar</span><span class="o">)</span>
+    <span class="n">AppBarLayout</span> <span class="n">mAblAppBar</span><span class="o">;</span> <span class="c1">// 整个可以滑动的AppBar</span>
+
+    <span class="nd">@Bind</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">main_tv_toolbar_title</span><span class="o">)</span>
+    <span class="n">TextView</span> <span class="n">mTvToolbarTitle</span><span class="o">;</span> <span class="c1">// 标题栏Title</span>
+
+    <span class="nd">@Bind</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">main_tb_toolbar</span><span class="o">)</span>
+    <span class="n">Toolbar</span> <span class="n">mTbToolbar</span><span class="o">;</span> <span class="c1">// 工具栏</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kd">super</span><span class="o">.</span><span class="na">onCreate</span><span class="o">(</span><span class="n">savedInstanceState</span><span class="o">);</span>
+        <span class="n">setContentView</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">layout</span><span class="o">.</span><span class="na">activity_main</span><span class="o">);</span>
+        <span class="n">ButterKnife</span><span class="o">.</span><span class="na">bind</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+
+        <span class="n">mTbToolbar</span><span class="o">.</span><span class="na">setTitle</span><span class="o">(</span><span class="s">&quot;&quot;</span><span class="o">);</span>
+
+        <span class="c1">// AppBar的监听</span>
+        <span class="n">mAblAppBar</span><span class="o">.</span><span class="na">addOnOffsetChangedListener</span><span class="o">(</span><span class="k">new</span> <span class="n">AppBarLayout</span><span class="o">.</span><span class="na">OnOffsetChangedListener</span><span class="o">()</span> <span class="o">{</span>
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onOffsetChanged</span><span class="o">(</span><span class="n">AppBarLayout</span> <span class="n">appBarLayout</span><span class="o">,</span> <span class="kt">int</span> <span class="n">verticalOffset</span><span class="o">)</span> <span class="o">{</span>
+                <span class="kt">int</span> <span class="n">maxScroll</span> <span class="o">=</span> <span class="n">appBarLayout</span><span class="o">.</span><span class="na">getTotalScrollRange</span><span class="o">();</span>
+                <span class="kt">float</span> <span class="n">percentage</span> <span class="o">=</span> <span class="o">(</span><span class="kt">float</span><span class="o">)</span> <span class="n">Math</span><span class="o">.</span><span class="na">abs</span><span class="o">(</span><span class="n">verticalOffset</span><span class="o">)</span> <span class="o">/</span> <span class="o">(</span><span class="kt">float</span><span class="o">)</span> <span class="n">maxScroll</span><span class="o">;</span>
+                <span class="n">handleAlphaOnTitle</span><span class="o">(</span><span class="n">percentage</span><span class="o">);</span>
+                <span class="n">handleToolbarTitleVisibility</span><span class="o">(</span><span class="n">percentage</span><span class="o">);</span>
+            <span class="o">}</span>
+        <span class="o">});</span>
+
+        <span class="n">initParallaxValues</span><span class="o">();</span> <span class="c1">// 自动滑动效果</span>
+    <span class="o">}</span>
+
+    <span class="c1">// 设置自动滑动的动画效果</span>
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">initParallaxValues</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">CollapsingToolbarLayout</span><span class="o">.</span><span class="na">LayoutParams</span> <span class="n">petDetailsLp</span> <span class="o">=</span>
+                <span class="o">(</span><span class="n">CollapsingToolbarLayout</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">)</span> <span class="n">mIvPlaceholder</span><span class="o">.</span><span class="na">getLayoutParams</span><span class="o">();</span>
+
+        <span class="n">CollapsingToolbarLayout</span><span class="o">.</span><span class="na">LayoutParams</span> <span class="n">petBackgroundLp</span> <span class="o">=</span>
+                <span class="o">(</span><span class="n">CollapsingToolbarLayout</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">)</span> <span class="n">mFlTitleContainer</span><span class="o">.</span><span class="na">getLayoutParams</span><span class="o">();</span>
+
+        <span class="n">petDetailsLp</span><span class="o">.</span><span class="na">setParallaxMultiplier</span><span class="o">(</span><span class="mf">0.9f</span><span class="o">);</span>
+        <span class="n">petBackgroundLp</span><span class="o">.</span><span class="na">setParallaxMultiplier</span><span class="o">(</span><span class="mf">0.3f</span><span class="o">);</span>
+
+        <span class="n">mIvPlaceholder</span><span class="o">.</span><span class="na">setLayoutParams</span><span class="o">(</span><span class="n">petDetailsLp</span><span class="o">);</span>
+        <span class="n">mFlTitleContainer</span><span class="o">.</span><span class="na">setLayoutParams</span><span class="o">(</span><span class="n">petBackgroundLp</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="c1">// 处理ToolBar的显示</span>
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">handleToolbarTitleVisibility</span><span class="o">(</span><span class="kt">float</span> <span class="n">percentage</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">percentage</span> <span class="o">&gt;=</span> <span class="n">PERCENTAGE_TO_SHOW_TITLE_AT_TOOLBAR</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">if</span> <span class="o">(!</span><span class="n">mIsTheTitleVisible</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">startAlphaAnimation</span><span class="o">(</span><span class="n">mTvToolbarTitle</span><span class="o">,</span> <span class="n">ALPHA_ANIMATIONS_DURATION</span><span class="o">,</span> <span class="n">View</span><span class="o">.</span><span class="na">VISIBLE</span><span class="o">);</span>
+                <span class="n">mIsTheTitleVisible</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">mIsTheTitleVisible</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">startAlphaAnimation</span><span class="o">(</span><span class="n">mTvToolbarTitle</span><span class="o">,</span> <span class="n">ALPHA_ANIMATIONS_DURATION</span><span class="o">,</span> <span class="n">View</span><span class="o">.</span><span class="na">INVISIBLE</span><span class="o">);</span>
+                <span class="n">mIsTheTitleVisible</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="c1">// 控制Title的显示</span>
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">handleAlphaOnTitle</span><span class="o">(</span><span class="kt">float</span> <span class="n">percentage</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">percentage</span> <span class="o">&gt;=</span> <span class="n">PERCENTAGE_TO_HIDE_TITLE_DETAILS</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">mIsTheTitleContainerVisible</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">startAlphaAnimation</span><span class="o">(</span><span class="n">mLlTitleContainer</span><span class="o">,</span> <span class="n">ALPHA_ANIMATIONS_DURATION</span><span class="o">,</span> <span class="n">View</span><span class="o">.</span><span class="na">INVISIBLE</span><span class="o">);</span>
+                <span class="n">mIsTheTitleContainerVisible</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+            <span class="k">if</span> <span class="o">(!</span><span class="n">mIsTheTitleContainerVisible</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">startAlphaAnimation</span><span class="o">(</span><span class="n">mLlTitleContainer</span><span class="o">,</span> <span class="n">ALPHA_ANIMATIONS_DURATION</span><span class="o">,</span> <span class="n">View</span><span class="o">.</span><span class="na">VISIBLE</span><span class="o">);</span>
+                <span class="n">mIsTheTitleContainerVisible</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="c1">// 设置渐变的动画</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">startAlphaAnimation</span><span class="o">(</span><span class="n">View</span> <span class="n">v</span><span class="o">,</span> <span class="kt">long</span> <span class="n">duration</span><span class="o">,</span> <span class="kt">int</span> <span class="n">visibility</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">AlphaAnimation</span> <span class="n">alphaAnimation</span> <span class="o">=</span> <span class="o">(</span><span class="n">visibility</span> <span class="o">==</span> <span class="n">View</span><span class="o">.</span><span class="na">VISIBLE</span><span class="o">)</span>
+                <span class="o">?</span> <span class="k">new</span> <span class="n">AlphaAnimation</span><span class="o">(</span><span class="mf">0f</span><span class="o">,</span> <span class="mf">1f</span><span class="o">)</span>
+                <span class="o">:</span> <span class="k">new</span> <span class="n">AlphaAnimation</span><span class="o">(</span><span class="mf">1f</span><span class="o">,</span> <span class="mf">0f</span><span class="o">);</span>
+
+        <span class="n">alphaAnimation</span><span class="o">.</span><span class="na">setDuration</span><span class="o">(</span><span class="n">duration</span><span class="o">);</span>
+        <span class="n">alphaAnimation</span><span class="o">.</span><span class="na">setFillAfter</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+        <span class="n">v</span><span class="o">.</span><span class="na">startAnimation</span><span class="o">(</span><span class="n">alphaAnimation</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+
+
+<h4>AvatarImageBehavior.java</h4>
+<div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nn">spikeking.github.com.testcoordinatorlayout</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">android.content.Context</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">android.support.design.widget.CoordinatorLayout</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">android.support.v7.widget.Toolbar</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">android.util.AttributeSet</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">android.view.View</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">de.hdodenhof.circleimageview.CircleImageView</span><span class="o">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * 图片控件位置动画</span>
+<span class="cm"> *</span>
+<span class="cm"> * @author wangchenlong</span>
+<span class="cm"> */</span>
+<span class="nd">@SuppressWarnings</span><span class="o">(</span><span class="s">&quot;unused&quot;</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">AvatarImageBehavior</span> <span class="kd">extends</span> <span class="n">CoordinatorLayout</span><span class="o">.</span><span class="na">Behavior</span><span class="o">&lt;</span><span class="n">CircleImageView</span><span class="o">&gt;</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="kd">static</span> <span class="kt">float</span> <span class="n">MIN_AVATAR_PERCENTAGE_SIZE</span> <span class="o">=</span> <span class="mf">0.3f</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="kd">static</span> <span class="kt">int</span> <span class="n">EXTRA_FINAL_AVATAR_PADDING</span> <span class="o">=</span> <span class="mi">80</span><span class="o">;</span>
+
+    <span class="kd">private</span> <span class="kt">int</span> <span class="n">mStartYPosition</span><span class="o">;</span> <span class="c1">// 起始的Y轴位置</span>
+    <span class="kd">private</span> <span class="kt">int</span> <span class="n">mFinalYPosition</span><span class="o">;</span> <span class="c1">// 结束的Y轴位置</span>
+    <span class="kd">private</span> <span class="kt">int</span> <span class="n">mStartHeight</span><span class="o">;</span> <span class="c1">// 开始的图片高度</span>
+    <span class="kd">private</span> <span class="kt">int</span> <span class="n">mFinalHeight</span><span class="o">;</span> <span class="c1">// 结束的图片高度</span>
+    <span class="kd">private</span> <span class="kt">int</span> <span class="n">mStartXPosition</span><span class="o">;</span> <span class="c1">// 起始的X轴高度</span>
+    <span class="kd">private</span> <span class="kt">int</span> <span class="n">mFinalXPosition</span><span class="o">;</span> <span class="c1">// 结束的X轴高度</span>
+    <span class="kd">private</span> <span class="kt">float</span> <span class="n">mStartToolbarPosition</span><span class="o">;</span> <span class="c1">// Toolbar的起始位置</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">Context</span> <span class="n">mContext</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kt">float</span> <span class="n">mAvatarMaxSize</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="nf">AvatarImageBehavior</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="n">AttributeSet</span> <span class="n">attrs</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">mContext</span> <span class="o">=</span> <span class="n">context</span><span class="o">;</span>
+        <span class="n">init</span><span class="o">();</span>
+    <span class="o">}</span>
+
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">init</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">bindDimensions</span><span class="o">();</span>
+    <span class="o">}</span>
+
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">bindDimensions</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">mAvatarMaxSize</span> <span class="o">=</span> <span class="n">mContext</span><span class="o">.</span><span class="na">getResources</span><span class="o">().</span><span class="na">getDimension</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">dimen</span><span class="o">.</span><span class="na">image_width</span><span class="o">);</span>
+    <span class="o">}</span>
+
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">layoutDependsOn</span><span class="o">(</span><span class="n">CoordinatorLayout</span> <span class="n">parent</span><span class="o">,</span> <span class="n">CircleImageView</span> <span class="n">child</span><span class="o">,</span> <span class="n">View</span> <span class="n">dependency</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">// 依赖Toolbar控件</span>
+        <span class="k">return</span> <span class="n">dependency</span> <span class="k">instanceof</span> <span class="n">Toolbar</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">onDependentViewChanged</span><span class="o">(</span><span class="n">CoordinatorLayout</span> <span class="n">parent</span><span class="o">,</span> <span class="n">CircleImageView</span> <span class="n">child</span><span class="o">,</span> <span class="n">View</span> <span class="n">dependency</span><span class="o">)</span> <span class="o">{</span>
+
+        <span class="c1">// 初始化属性</span>
+        <span class="n">shouldInitProperties</span><span class="o">(</span><span class="n">child</span><span class="o">,</span> <span class="n">dependency</span><span class="o">);</span>
+
+        <span class="c1">// 最大滑动距离: 起始位置-状态栏高度</span>
+        <span class="kd">final</span> <span class="kt">int</span> <span class="n">maxScrollDistance</span> <span class="o">=</span> <span class="o">(</span><span class="kt">int</span><span class="o">)</span> <span class="o">(</span><span class="n">mStartToolbarPosition</span> <span class="o">-</span> <span class="n">getStatusBarHeight</span><span class="o">());</span>
+
+        <span class="c1">// 滑动的百分比</span>
+        <span class="kt">float</span> <span class="n">expandedPercentageFactor</span> <span class="o">=</span> <span class="n">dependency</span><span class="o">.</span><span class="na">getY</span><span class="o">()</span> <span class="o">/</span> <span class="n">maxScrollDistance</span><span class="o">;</span>
+
+        <span class="c1">// Y轴距离</span>
+        <span class="kt">float</span> <span class="n">distanceYToSubtract</span> <span class="o">=</span> <span class="o">((</span><span class="n">mStartYPosition</span> <span class="o">-</span> <span class="n">mFinalYPosition</span><span class="o">)</span>
+                <span class="o">*</span> <span class="o">(</span><span class="mf">1f</span> <span class="o">-</span> <span class="n">expandedPercentageFactor</span><span class="o">))</span> <span class="o">+</span> <span class="o">(</span><span class="n">child</span><span class="o">.</span><span class="na">getHeight</span><span class="o">()</span> <span class="o">/</span> <span class="mi">2</span><span class="o">);</span>
+
+        <span class="c1">// X轴距离</span>
+        <span class="kt">float</span> <span class="n">distanceXToSubtract</span> <span class="o">=</span> <span class="o">((</span><span class="n">mStartXPosition</span> <span class="o">-</span> <span class="n">mFinalXPosition</span><span class="o">)</span>
+                <span class="o">*</span> <span class="o">(</span><span class="mf">1f</span> <span class="o">-</span> <span class="n">expandedPercentageFactor</span><span class="o">))</span> <span class="o">+</span> <span class="o">(</span><span class="n">child</span><span class="o">.</span><span class="na">getWidth</span><span class="o">()</span> <span class="o">/</span> <span class="mi">2</span><span class="o">);</span>
+
+        <span class="c1">// 高度减小</span>
+        <span class="kt">float</span> <span class="n">heightToSubtract</span> <span class="o">=</span> <span class="o">((</span><span class="n">mStartHeight</span> <span class="o">-</span> <span class="n">mFinalHeight</span><span class="o">)</span> <span class="o">*</span> <span class="o">(</span><span class="mf">1f</span> <span class="o">-</span> <span class="n">expandedPercentageFactor</span><span class="o">));</span>
+
+        <span class="c1">// 图片位置</span>
+        <span class="n">child</span><span class="o">.</span><span class="na">setY</span><span class="o">(</span><span class="n">mStartYPosition</span> <span class="o">-</span> <span class="n">distanceYToSubtract</span><span class="o">);</span>
+        <span class="n">child</span><span class="o">.</span><span class="na">setX</span><span class="o">(</span><span class="n">mStartXPosition</span> <span class="o">-</span> <span class="n">distanceXToSubtract</span><span class="o">);</span>
+
+        <span class="c1">// 图片大小</span>
+        <span class="n">CoordinatorLayout</span><span class="o">.</span><span class="na">LayoutParams</span> <span class="n">lp</span> <span class="o">=</span> <span class="o">(</span><span class="n">CoordinatorLayout</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">)</span> <span class="n">child</span><span class="o">.</span><span class="na">getLayoutParams</span><span class="o">();</span>
+        <span class="n">lp</span><span class="o">.</span><span class="na">width</span> <span class="o">=</span> <span class="o">(</span><span class="kt">int</span><span class="o">)</span> <span class="o">(</span><span class="n">mStartHeight</span> <span class="o">-</span> <span class="n">heightToSubtract</span><span class="o">);</span>
+        <span class="n">lp</span><span class="o">.</span><span class="na">height</span> <span class="o">=</span> <span class="o">(</span><span class="kt">int</span><span class="o">)</span> <span class="o">(</span><span class="n">mStartHeight</span> <span class="o">-</span> <span class="n">heightToSubtract</span><span class="o">);</span>
+        <span class="n">child</span><span class="o">.</span><span class="na">setLayoutParams</span><span class="o">(</span><span class="n">lp</span><span class="o">);</span>
+
+        <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="cm">/**</span>
+<span class="cm">     * 初始化动画值</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param child      图片控件</span>
+<span class="cm">     * @param dependency ToolBar</span>
+<span class="cm">     */</span>
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">shouldInitProperties</span><span class="o">(</span><span class="n">CircleImageView</span> <span class="n">child</span><span class="o">,</span> <span class="n">View</span> <span class="n">dependency</span><span class="o">)</span> <span class="o">{</span>
+
+        <span class="c1">// 图片控件中心</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">mStartYPosition</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span>
+            <span class="n">mStartYPosition</span> <span class="o">=</span> <span class="o">(</span><span class="kt">int</span><span class="o">)</span> <span class="o">(</span><span class="n">child</span><span class="o">.</span><span class="na">getY</span><span class="o">()</span> <span class="o">+</span> <span class="o">(</span><span class="n">child</span><span class="o">.</span><span class="na">getHeight</span><span class="o">()</span> <span class="o">/</span> <span class="mi">2</span><span class="o">));</span>
+
+        <span class="c1">// Toolbar中心</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">mFinalYPosition</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span>
+            <span class="n">mFinalYPosition</span> <span class="o">=</span> <span class="o">(</span><span class="n">dependency</span><span class="o">.</span><span class="na">getHeight</span><span class="o">()</span> <span class="o">/</span> <span class="mi">2</span><span class="o">);</span>
+
+        <span class="c1">// 图片高度</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">mStartHeight</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span>
+            <span class="n">mStartHeight</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="na">getHeight</span><span class="o">();</span>
+
+        <span class="c1">// Toolbar缩略图高度</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">mFinalHeight</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span>
+            <span class="n">mFinalHeight</span> <span class="o">=</span> <span class="n">mContext</span><span class="o">.</span><span class="na">getResources</span><span class="o">().</span><span class="na">getDimensionPixelOffset</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">dimen</span><span class="o">.</span><span class="na">image_final_width</span><span class="o">);</span>
+
+        <span class="c1">// 图片控件水平中心</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">mStartXPosition</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span>
+            <span class="n">mStartXPosition</span> <span class="o">=</span> <span class="o">(</span><span class="kt">int</span><span class="o">)</span> <span class="o">(</span><span class="n">child</span><span class="o">.</span><span class="na">getX</span><span class="o">()</span> <span class="o">+</span> <span class="o">(</span><span class="n">child</span><span class="o">.</span><span class="na">getWidth</span><span class="o">()</span> <span class="o">/</span> <span class="mi">2</span><span class="o">));</span>
+
+        <span class="c1">// 边缘+缩略图宽度的一半</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">mFinalXPosition</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span>
+            <span class="n">mFinalXPosition</span> <span class="o">=</span> <span class="n">mContext</span><span class="o">.</span><span class="na">getResources</span><span class="o">().</span><span class="na">getDimensionPixelOffset</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">dimen</span><span class="o">.</span><span class="na">abc_action_bar_content_inset_material</span><span class="o">)</span> <span class="o">+</span> <span class="o">(</span><span class="n">mFinalHeight</span> <span class="o">/</span> <span class="mi">2</span><span class="o">);</span>
+
+        <span class="c1">// Toolbar的起始位置</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">mStartToolbarPosition</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span>
+            <span class="n">mStartToolbarPosition</span> <span class="o">=</span> <span class="n">dependency</span><span class="o">.</span><span class="na">getY</span><span class="o">()</span> <span class="o">+</span> <span class="o">(</span><span class="n">dependency</span><span class="o">.</span><span class="na">getHeight</span><span class="o">()</span> <span class="o">/</span> <span class="mi">2</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="c1">// 获取状态栏高度</span>
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getStatusBarHeight</span><span class="o">()</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="n">result</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+        <span class="kt">int</span> <span class="n">resourceId</span> <span class="o">=</span> <span class="n">mContext</span><span class="o">.</span><span class="na">getResources</span><span class="o">().</span><span class="na">getIdentifier</span><span class="o">(</span><span class="s">&quot;status_bar_height&quot;</span><span class="o">,</span> <span class="s">&quot;dimen&quot;</span><span class="o">,</span> <span class="s">&quot;android&quot;</span><span class="o">);</span>
+
+        <span class="k">if</span> <span class="o">(</span><span class="n">resourceId</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">mContext</span><span class="o">.</span><span class="na">getResources</span><span class="o">().</span><span class="na">getDimensionPixelSize</span><span class="o">(</span><span class="n">resourceId</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+
+
+<h4>activity_main.xml</h4>
+<div class="highlight"><pre><span></span><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
+<span class="nt">&lt;android.support.design.widget.CoordinatorLayout</span>
+    <span class="na">xmlns:android=</span><span class="s">&quot;http://schemas.android.com/apk/res/android&quot;</span>
+    <span class="na">xmlns:app=</span><span class="s">&quot;http://schemas.android.com/apk/res-auto&quot;</span>
+    <span class="na">xmlns:tools=</span><span class="s">&quot;http://schemas.android.com/tools&quot;</span>
+    <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+    <span class="na">android:layout_height=</span><span class="s">&quot;match_parent&quot;</span>
+    <span class="na">android:fitsSystemWindows=</span><span class="s">&quot;false&quot;</span>
+    <span class="na">tools:context=</span><span class="s">&quot;.MainActivity&quot;</span><span class="nt">&gt;</span>
+
+    <span class="nt">&lt;android.support.design.widget.AppBarLayout</span>
+        <span class="na">android:id=</span><span class="s">&quot;@+id/main_abl_app_bar&quot;</span>
+        <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+        <span class="na">android:layout_height=</span><span class="s">&quot;wrap_content&quot;</span>
+        <span class="na">android:theme=</span><span class="s">&quot;@style/ThemeOverlay.AppCompat.Dark.ActionBar&quot;</span><span class="nt">&gt;</span>
+
+        <span class="nt">&lt;android.support.design.widget.CollapsingToolbarLayout</span>
+            <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+            <span class="na">android:layout_height=</span><span class="s">&quot;450dp&quot;</span>
+            <span class="na">app:layout_scrollFlags=</span><span class="s">&quot;scroll|exitUntilCollapsed|snap&quot;</span><span class="nt">&gt;</span>
+
+            <span class="nt">&lt;ImageView</span>
+                <span class="na">android:id=</span><span class="s">&quot;@+id/main_iv_placeholder&quot;</span>
+                <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+                <span class="na">android:layout_height=</span><span class="s">&quot;300dp&quot;</span>
+                <span class="na">android:scaleType=</span><span class="s">&quot;centerCrop&quot;</span>
+                <span class="na">android:src=</span><span class="s">&quot;@drawable/large&quot;</span>
+                <span class="na">app:layout_collapseMode=</span><span class="s">&quot;parallax&quot;</span> <span class="nt">/&gt;</span>
+
+            <span class="nt">&lt;FrameLayout</span>
+                <span class="na">android:id=</span><span class="s">&quot;@+id/main_fl_title&quot;</span>
+                <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+                <span class="na">android:layout_height=</span><span class="s">&quot;150dp&quot;</span>
+                <span class="na">android:layout_gravity=</span><span class="s">&quot;bottom|center_horizontal&quot;</span>
+                <span class="na">android:background=</span><span class="s">&quot;@color/colorPrimary&quot;</span>
+                <span class="na">app:layout_collapseMode=</span><span class="s">&quot;parallax&quot;</span><span class="nt">&gt;</span>
+
+                <span class="nt">&lt;LinearLayout</span>
+                    <span class="na">android:id=</span><span class="s">&quot;@+id/main_ll_title_container&quot;</span>
+                    <span class="na">android:layout_width=</span><span class="s">&quot;wrap_content&quot;</span>
+                    <span class="na">android:layout_height=</span><span class="s">&quot;wrap_content&quot;</span>
+                    <span class="na">android:layout_gravity=</span><span class="s">&quot;center&quot;</span>
+                    <span class="na">android:orientation=</span><span class="s">&quot;vertical&quot;</span><span class="nt">&gt;</span>
+
+                    <span class="nt">&lt;TextView</span>
+                        <span class="na">android:layout_marginTop=</span><span class="s">&quot;@dimen/title_margin&quot;</span>
+                        <span class="na">android:layout_width=</span><span class="s">&quot;wrap_content&quot;</span>
+                        <span class="na">android:layout_height=</span><span class="s">&quot;wrap_content&quot;</span>
+                        <span class="na">android:layout_gravity=</span><span class="s">&quot;center_horizontal&quot;</span>
+                        <span class="na">android:gravity=</span><span class="s">&quot;bottom|center&quot;</span>
+                        <span class="na">android:text=</span><span class="s">&quot;@string/person_name&quot;</span>
+                        <span class="na">android:textColor=</span><span class="s">&quot;@android:color/white&quot;</span>
+                        <span class="na">android:textSize=</span><span class="s">&quot;30sp&quot;</span><span class="nt">/&gt;</span>
+
+                    <span class="nt">&lt;TextView</span>
+                        <span class="na">android:layout_width=</span><span class="s">&quot;wrap_content&quot;</span>
+                        <span class="na">android:layout_height=</span><span class="s">&quot;wrap_content&quot;</span>
+                        <span class="na">android:layout_gravity=</span><span class="s">&quot;center_horizontal&quot;</span>
+                        <span class="na">android:layout_marginTop=</span><span class="s">&quot;4dp&quot;</span>
+                        <span class="na">android:text=</span><span class="s">&quot;@string/person_title&quot;</span>
+                        <span class="na">android:textColor=</span><span class="s">&quot;@android:color/white&quot;</span> <span class="nt">/&gt;</span>
+                <span class="nt">&lt;/LinearLayout&gt;</span>
+            <span class="nt">&lt;/FrameLayout&gt;</span>
+        <span class="nt">&lt;/android.support.design.widget.CollapsingToolbarLayout&gt;</span>
+    <span class="nt">&lt;/android.support.design.widget.AppBarLayout&gt;</span>
+
+    <span class="nt">&lt;android.support.v4.widget.NestedScrollView</span>
+        <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+        <span class="na">android:layout_height=</span><span class="s">&quot;match_parent&quot;</span>
+        <span class="na">android:scrollbars=</span><span class="s">&quot;none&quot;</span>
+        <span class="na">app:behavior_overlapTop=</span><span class="s">&quot;30dp&quot;</span>
+        <span class="na">app:layout_behavior=</span><span class="s">&quot;@string/appbar_scrolling_view_behavior&quot;</span><span class="nt">&gt;</span>
+
+        <span class="nt">&lt;android.support.v7.widget.CardView</span>
+            <span class="na">android:layout_width=</span><span class="s">&quot;wrap_content&quot;</span>
+            <span class="na">android:layout_height=</span><span class="s">&quot;wrap_content&quot;</span>
+            <span class="na">android:layout_margin=</span><span class="s">&quot;8dp&quot;</span>
+            <span class="na">app:cardElevation=</span><span class="s">&quot;8dp&quot;</span>
+            <span class="na">app:contentPadding=</span><span class="s">&quot;16dp&quot;</span><span class="nt">&gt;</span>
+
+            <span class="nt">&lt;TextView</span>
+                <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+                <span class="na">android:layout_height=</span><span class="s">&quot;wrap_content&quot;</span>
+                <span class="na">android:lineSpacingExtra=</span><span class="s">&quot;8dp&quot;</span>
+                <span class="na">android:text=</span><span class="s">&quot;@string/person_intro&quot;</span> <span class="nt">/&gt;</span>
+
+        <span class="nt">&lt;/android.support.v7.widget.CardView&gt;</span>
+
+    <span class="nt">&lt;/android.support.v4.widget.NestedScrollView&gt;</span>
+
+    <span class="nt">&lt;android.support.v7.widget.Toolbar</span>
+        <span class="na">android:id=</span><span class="s">&quot;@+id/main_tb_toolbar&quot;</span>
+        <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+        <span class="na">android:layout_height=</span><span class="s">&quot;?attr/actionBarSize&quot;</span>
+        <span class="na">android:background=</span><span class="s">&quot;@color/colorPrimary&quot;</span>
+        <span class="na">app:layout_anchor=</span><span class="s">&quot;@id/main_fl_title&quot;</span>
+        <span class="na">app:theme=</span><span class="s">&quot;@style/ThemeOverlay.AppCompat.Dark&quot;</span><span class="nt">&gt;</span>
+
+        <span class="nt">&lt;LinearLayout</span>
+            <span class="na">android:layout_width=</span><span class="s">&quot;wrap_content&quot;</span>
+            <span class="na">android:layout_height=</span><span class="s">&quot;match_parent&quot;</span>
+            <span class="na">android:orientation=</span><span class="s">&quot;horizontal&quot;</span><span class="nt">&gt;</span>
+
+            <span class="nt">&lt;Space</span>
+                <span class="na">android:layout_width=</span><span class="s">&quot;@dimen/image_final_width&quot;</span>
+                <span class="na">android:layout_height=</span><span class="s">&quot;@dimen/image_final_width&quot;</span> <span class="nt">/&gt;</span>
+
+            <span class="nt">&lt;TextView</span>
+                <span class="na">android:id=</span><span class="s">&quot;@+id/main_tv_toolbar_title&quot;</span>
+                <span class="na">android:layout_width=</span><span class="s">&quot;wrap_content&quot;</span>
+                <span class="na">android:layout_height=</span><span class="s">&quot;match_parent&quot;</span>
+                <span class="na">android:layout_marginLeft=</span><span class="s">&quot;8dp&quot;</span>
+                <span class="na">android:gravity=</span><span class="s">&quot;center_vertical&quot;</span>
+                <span class="na">android:text=</span><span class="s">&quot;@string/person_name&quot;</span>
+                <span class="na">android:textColor=</span><span class="s">&quot;@android:color/white&quot;</span>
+                <span class="na">android:textSize=</span><span class="s">&quot;20sp&quot;</span>
+                <span class="na">android:visibility=</span><span class="s">&quot;invisible&quot;</span><span class="nt">/&gt;</span>
+
+        <span class="nt">&lt;/LinearLayout&gt;</span>
+
+    <span class="nt">&lt;/android.support.v7.widget.Toolbar&gt;</span>
+
+    <span class="nt">&lt;de.hdodenhof.circleimageview.CircleImageView</span>
+        <span class="na">android:layout_width=</span><span class="s">&quot;@dimen/image_width&quot;</span>
+        <span class="na">android:layout_height=</span><span class="s">&quot;@dimen/image_width&quot;</span>
+        <span class="na">android:layout_gravity=</span><span class="s">&quot;center&quot;</span>
+        <span class="na">android:src=</span><span class="s">&quot;@drawable/small&quot;</span>
+        <span class="na">app:border_color=</span><span class="s">&quot;@android:color/white&quot;</span>
+        <span class="na">app:border_width=</span><span class="s">&quot;2dp&quot;</span>
+        <span class="na">app:layout_behavior=</span><span class="s">&quot;.AvatarImageBehavior&quot;</span> <span class="nt">/&gt;</span>
+
+<span class="nt">&lt;/android.support.design.widget.CoordinatorLayout&gt;</span>
+</pre></div>
+
+
+<p>先从xml布局文件开始。</p>
+<h3>activity_main.xml分析</h3>
+<h4>android.support.v7.widget.Toolbar</h4>
+<p>官方在某些程度上认为 ActionBar 限制了 android app 的开发与设计的弹性，故有了Toolbar来取代过去 actionbar 的控件。</p>
+<h5>1. 基础使用</h5>
+<ul>
+<li>风格 (style)</li>
+<li>界面 (layout)</li>
+<li>程序 (java)</li>
+</ul>
+<h5>1.1 风格（style）</h5>
+<p>风格要调整的地方有二</p>
+<p>一在 res/values/styles.xml中</p>
+<p>二在 /res/values-v21/styles.xml中</p>
+<p>为了之后设定方便，我们先在 res/values/styles.xml 里增加一个名为 AppTheme.Base 的风格</p>
+<div class="highlight"><pre><span></span><span class="nt">&lt;style</span> <span class="na">name=</span><span class="s">&quot;AppTheme.Base&quot;</span> <span class="na">parent=</span><span class="s">&quot;Theme.AppCompat&quot;</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;item</span> <span class="na">name=</span><span class="s">&quot;windowActionBar&quot;</span><span class="nt">&gt;</span>false<span class="nt">&lt;/item&gt;</span>
+  <span class="nt">&lt;item</span> <span class="na">name=</span><span class="s">&quot;android:windowNoTitle&quot;</span><span class="nt">&gt;</span>true<span class="nt">&lt;/item&gt;</span>
+<span class="nt">&lt;/style&gt;</span>
+</pre></div>
+
+
+<p>因为此范例只使用 Toolbar，所以我们要将让原本的 ActionBar 隐藏起来，然后将原本 AppTheme 的 parent 属性 改为上面的AppTheme.Base，代码如下：</p>
+<div class="highlight"><pre><span></span><span class="nt">&lt;resources&gt;</span>
+
+  <span class="c">&lt;!-- Base application theme. --&gt;</span>
+  <span class="nt">&lt;style</span> <span class="na">name=</span><span class="s">&quot;AppTheme&quot;</span> <span class="na">parent=</span><span class="s">&quot;AppTheme.Base&quot;</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;/style&gt;</span>
+
+  <span class="nt">&lt;style</span> <span class="na">name=</span><span class="s">&quot;AppTheme.Base&quot;</span> <span class="na">parent=</span><span class="s">&quot;Theme.AppCompat&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;item</span> <span class="na">name=</span><span class="s">&quot;windowActionBar&quot;</span><span class="nt">&gt;</span>false<span class="nt">&lt;/item&gt;</span>
+    <span class="nt">&lt;del&gt;&lt;item</span> <span class="na">name=</span><span class="s">&quot;android:windowNoTitle&quot;</span><span class="nt">&gt;</span>true<span class="nt">&lt;/item&gt;&lt;/del&gt;</span>
+    <span class="c">&lt;!-- 使用 API Level 22 編譯的話，要拿掉前綴字 --&gt;</span>
+    <span class="nt">&lt;item</span> <span class="na">name=</span><span class="s">&quot;windowNoTitle&quot;</span><span class="nt">&gt;</span>true<span class="nt">&lt;/item&gt;</span>
+  <span class="nt">&lt;/style&gt;</span>
+
+<span class="nt">&lt;/resources&gt;</span>
+</pre></div>
+
+
+<p>再来调整Android 5.0的style：  /res/values-v21/styles.xml，也将其 parent 属性改为  AppTheme.Base：</p>
+<div class="highlight"><pre><span></span><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
+<span class="nt">&lt;resources&gt;</span>
+    <span class="nt">&lt;style</span> <span class="na">name=</span><span class="s">&quot;AppTheme&quot;</span> <span class="na">parent=</span><span class="s">&quot;AppTheme.Base&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;/style&gt;</span>
+<span class="nt">&lt;/resources&gt;</span>
+</pre></div>
+
+
+<h5>1.2 界面（Layout）</h5>
+<p>在 activity_main.xml 里面添加 Toolbar 控件：</p>
+<div class="highlight"><pre><span></span><span class="nt">&lt;android.support.v7.widget.Toolbar</span>
+  <span class="na">android:id=</span><span class="s">&quot;@+id/toolbar&quot;</span>
+  <span class="na">android:layout_height=</span><span class="s">&quot;?attr/actionBarSize&quot;</span>
+  <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span> <span class="nt">&gt;</span>
+
+<span class="nt">&lt;/android.support.v7.widget.Toolbar&gt;</span>
+</pre></div>
+
+
+<p>请记得用 support v7 里的 toolbar，不然然只有 API Level 21 也就是 Android 5.0 以上的版本才能使用。</p>
+<p>这里需注意，要将 RelatvieLayout 里的四个方向的padding 属性去掉，并记得将原本的 Hello World 设为 layout_below="@+id/toolbar" ，否则会看到像下面这样的错误画面。</p>
+<p><img alt="" src="http://www.jcodecraeer.com/uploads/20141118/14162844682218.png" /></p>
+<h5>1.3 程序（Java）</h5>
+<p>在 MainActivity.java 中加入 Toolbar 的声明：</p>
+<div class="highlight"><pre><span></span><span class="n">Toolbar</span> <span class="n">toolbar</span> <span class="o">=</span> <span class="o">(</span><span class="n">Toolbar</span><span class="o">)</span> <span class="n">findViewById</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">toolbar</span><span class="o">);</span>
+<span class="n">setSupportActionBar</span><span class="o">(</span><span class="n">toolbar</span><span class="o">);</span>
+</pre></div>
+
+
+<p>声明后，再将之用 setSupportActionBar 设定，Toolbar即能取代原本的 actionbar 了，此阶段完成画面如下：</p>
+<p><img alt="" src="http://www.jcodecraeer.com/uploads/20141118/14162846136933.png" /></p>
+<h5>2. 自定义颜色</h5>
+<p>这个阶段将从 1接着往下进行：</p>
+<p><img alt="" src="http://www.jcodecraeer.com/uploads/20141118/14162849281137.png" /></p>
+<p>上图是将本阶段要完成的结果画面做了标示，结合下面的描述希望大家能明白。</p>
+<ol>
+<li>
+<p>colorPrimaryDark（状态栏底色）：在风格 (styles) 或是主题 (themes) 里进行设定。</p>
+</li>
+<li>
+<p>App bar 底色</p>
+</li>
+</ol>
+<p>这个设定分为二，若你的 android app 仍是使用 actionbar ，则直接在风格 (styles) 或是主题 (themes) 里进行设定 colorPrimary 参数即可；
+   可若是采用 toolbar 的话，则要在界面 (layout) 里面设定 toolbar 控件的 background 属性。</p>
+<ol>
+<li>navigationBarColor（导航栏底色）：</li>
+</ol>
+<p>仅能在 API v21 也就是 Android 5 以后的版本中使用， 因此要将之设定在 res/values-v21/styles.xml 里面。</p>
+<ol>
+<li>主视窗底色：windowBackground</li>
+</ol>
+<p>也因此在这个阶段，我们需要设定的地方有三，一是 style中(res/values/styles.xml)</p>
+<div class="highlight"><pre><span></span><span class="nt">&lt;style</span> <span class="na">name=</span><span class="s">&quot;AppTheme.Base&quot;</span> <span class="na">parent=</span><span class="s">&quot;Theme.AppCompat&quot;</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;item</span> <span class="na">name=</span><span class="s">&quot;windowActionBar&quot;</span><span class="nt">&gt;</span>false<span class="nt">&lt;/item&gt;</span>
+  <span class="nt">&lt;item</span> <span class="na">name=</span><span class="s">&quot;android:windowNoTitle&quot;</span><span class="nt">&gt;</span>true<span class="nt">&lt;/item&gt;</span>
+  <span class="c">&lt;!-- Actionbar color --&gt;</span>
+  <span class="nt">&lt;item</span> <span class="na">name=</span><span class="s">&quot;colorPrimary&quot;</span><span class="nt">&gt;</span>@color/accent_material_dark<span class="nt">&lt;/item&gt;</span>
+  <span class="c">&lt;!--Status bar color--&gt;</span>
+  <span class="nt">&lt;item</span> <span class="na">name=</span><span class="s">&quot;colorPrimaryDark&quot;</span><span class="nt">&gt;</span>@color/accent_material_light<span class="nt">&lt;/item&gt;</span>
+  <span class="c">&lt;!--Window color--&gt;</span>
+  <span class="nt">&lt;item</span> <span class="na">name=</span><span class="s">&quot;android:windowBackground&quot;</span><span class="nt">&gt;</span>@color/dim_foreground_material_dark<span class="nt">&lt;/item&gt;</span>
+<span class="nt">&lt;/style&gt;</span>
+</pre></div>
+
+
+<p>再来是 v21 的style中 (res/values-v21/styles.xml)</p>
+<div class="highlight"><pre><span></span><span class="nt">&lt;style</span> <span class="na">name=</span><span class="s">&quot;AppTheme&quot;</span> <span class="na">parent=</span><span class="s">&quot;AppTheme.Base&quot;</span><span class="nt">&gt;</span>
+  <span class="c">&lt;!--Navigation bar color--&gt;</span>
+  <span class="nt">&lt;item</span> <span class="na">name=</span><span class="s">&quot;android:navigationBarColor&quot;</span><span class="nt">&gt;</span>@color/accent_material_light<span class="nt">&lt;/item&gt;</span>
+<span class="nt">&lt;/style&gt;</span>
+</pre></div>
+
+
+<p>最后，就是为了本篇的主角 – Toolbar 的 background 进行设定。</p>
+<div class="highlight"><pre><span></span><span class="nt">&lt;android.support.v7.widget.Toolbar</span>
+  <span class="na">android:id=</span><span class="s">&quot;@+id/toolbar&quot;</span>
+  <span class="na">android:layout_height=</span><span class="s">&quot;?attr/actionBarSize&quot;</span>
+  <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+  <span class="na">android:background=</span><span class="s">&quot;?attr/colorPrimary&quot;</span> <span class="nt">&gt;</span>
+
+<span class="nt">&lt;/android.support.v7.widget.Toolbar&gt;</span>
+</pre></div>
+
+
+<p>在本范例中，toolbar 是设定来在 activity_main.xml，对其设定 background 属性： android:background="?attr/colorPrimary" ，这样就可以使之延用 Actionbar 的颜色设定喽。</p>
+<p>最后，再来看一下结果画面。</p>
+<p><img alt="" src="http://www.jcodecraeer.com/uploads/20141118/14162856831120.png" /></p>
+<h5>3. 控件</h5>
+<p>本阶段将从2接续，在还未于 <android.support.v7.widget.Toolbar/>  标签中，自行添加元件的 toolbar 有几个大家常用的元素可以使用，请先见下图：</p>
+<p><img alt="" src="http://www.jcodecraeer.com/uploads/20141118/1416285884351.png" /></p>
+<p>大抵来说，预设常用的几个元素就如图中所示，接着就依序来说明之：</p>
+<ol>
+<li>
+<p>setNavigationIcon
+   即设定 up button 的图标，因为 Material 的介面，在 Toolbar这里的 up button样式也就有別于过去的 ActionBar 哦。</p>
+</li>
+<li>
+<p>setLogo
+   APP 的图标。</p>
+</li>
+<li>setTitle
+   主标题。</li>
+<li>setSubtitle
+   副标题。</li>
+<li>setOnMenuItemClickListener
+   设定菜单各按鈕的动作。</li>
+</ol>
+<p>先来看看菜单外的代码，在 MainActivity.java 中：</p>
+<div class="highlight"><pre><span></span><span class="n">Toolbar</span> <span class="n">toolbar</span> <span class="o">=</span> <span class="o">(</span><span class="n">Toolbar</span><span class="o">)</span> <span class="n">findViewById</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">toolbar</span><span class="o">);</span>
+
+<span class="c1">// App Logo</span>
+<span class="n">toolbar</span><span class="o">.</span><span class="na">setLogo</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">ic_launcher</span><span class="o">);</span>
+<span class="c1">// Title</span>
+<span class="n">toolbar</span><span class="o">.</span><span class="na">setTitle</span><span class="o">(</span><span class="s">&quot;My Title&quot;</span><span class="o">);</span>
+<span class="c1">// Sub Title</span>
+<span class="n">toolbar</span><span class="o">.</span><span class="na">setSubtitle</span><span class="o">(</span><span class="s">&quot;Sub title&quot;</span><span class="o">);</span>
+
+<span class="n">setSupportActionBar</span><span class="o">(</span><span class="n">toolbar</span><span class="o">);</span>
+
+<span class="c1">// Navigation Icon 要設定在 setSupoortActionBar 才有作用</span>
+<span class="c1">// 否則會出現 back button</span>
+<span class="n">toolbar</span><span class="o">.</span><span class="na">setNavigationIcon</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">ab_android</span><span class="o">);</span>
+</pre></div>
+
+
+<p>这边要留意的是setNavigationIcon需要放在 setSupportActionBar之后才会生效。</p>
+<p>菜单部分，需要先在res/menu/menu_main.xml左定义：</p>
+<div class="highlight"><pre><span></span><span class="nt">&lt;menu</span> <span class="na">xmlns:android=</span><span class="s">&quot;http://schemas.android.com/apk/res/android&quot;</span>
+      <span class="na">xmlns:app=</span><span class="s">&quot;http://schemas.android.com/apk/res-auto&quot;</span>
+      <span class="na">xmlns:tools=</span><span class="s">&quot;http://schemas.android.com/tools&quot;</span>
+      <span class="na">tools:context=</span><span class="s">&quot;.MainActivity&quot;</span><span class="nt">&gt;</span>
+
+  <span class="nt">&lt;item</span> <span class="na">android:id=</span><span class="s">&quot;@+id/action_edit&quot;</span>
+        <span class="na">android:title=</span><span class="s">&quot;@string/action_edit&quot;</span>
+        <span class="na">android:orderInCategory=</span><span class="s">&quot;80&quot;</span>
+        <span class="na">android:icon=</span><span class="s">&quot;@drawable/ab_edit&quot;</span>
+        <span class="na">app:showAsAction=</span><span class="s">&quot;ifRoom&quot;</span> <span class="nt">/&gt;</span>
+
+  <span class="nt">&lt;item</span> <span class="na">android:id=</span><span class="s">&quot;@+id/action_share&quot;</span>
+        <span class="na">android:title=</span><span class="s">&quot;@string/action_edit&quot;</span>
+        <span class="na">android:orderInCategory=</span><span class="s">&quot;90&quot;</span>
+        <span class="na">android:icon=</span><span class="s">&quot;@drawable/ab_share&quot;</span>
+        <span class="na">app:showAsAction=</span><span class="s">&quot;ifRoom&quot;</span> <span class="nt">/&gt;</span>
+
+  <span class="nt">&lt;item</span> <span class="na">android:id=</span><span class="s">&quot;@+id/action_settings&quot;</span>
+        <span class="na">android:title=</span><span class="s">&quot;@string/action_settings&quot;</span>
+        <span class="na">android:orderInCategory=</span><span class="s">&quot;100&quot;</span>
+        <span class="na">app:showAsAction=</span><span class="s">&quot;never&quot;</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;/menu&gt;</span>
+</pre></div>
+
+
+<p>再回到MainActivity.java 中加入OnMenuItemClickListener 的监听者：</p>
+<div class="highlight"><pre><span></span><span class="kd">private</span> <span class="n">Toolbar</span><span class="o">.</span><span class="na">OnMenuItemClickListener</span> <span class="n">onMenuItemClick</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Toolbar</span><span class="o">.</span><span class="na">OnMenuItemClickListener</span><span class="o">()</span> <span class="o">{</span>
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">onMenuItemClick</span><span class="o">(</span><span class="n">MenuItem</span> <span class="n">menuItem</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">String</span> <span class="n">msg</span> <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="o">;</span>
+    <span class="k">switch</span> <span class="o">(</span><span class="n">menuItem</span><span class="o">.</span><span class="na">getItemId</span><span class="o">())</span> <span class="o">{</span>
+      <span class="k">case</span> <span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">action_edit</span><span class="o">:</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s">&quot;Click edit&quot;</span><span class="o">;</span>
+        <span class="k">break</span><span class="o">;</span>
+      <span class="k">case</span> <span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">action_share</span><span class="o">:</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s">&quot;Click share&quot;</span><span class="o">;</span>
+        <span class="k">break</span><span class="o">;</span>
+      <span class="k">case</span> <span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">action_settings</span><span class="o">:</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s">&quot;Click setting&quot;</span><span class="o">;</span>
+        <span class="k">break</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="k">if</span><span class="o">(!</span><span class="n">msg</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="s">&quot;&quot;</span><span class="o">))</span> <span class="o">{</span>
+      <span class="n">Toast</span><span class="o">.</span><span class="na">makeText</span><span class="o">(</span><span class="n">MainActivity</span><span class="o">.</span><span class="na">this</span><span class="o">,</span> <span class="n">msg</span><span class="o">,</span> <span class="n">Toast</span><span class="o">.</span><span class="na">LENGTH_SHORT</span><span class="o">).</span><span class="na">show</span><span class="o">();</span>
+    <span class="o">}</span>
+    <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+  <span class="o">}</span>
+<span class="o">};</span>
+</pre></div>
+
+
+<p>将onMenuItemClick监听者设置给toolbar</p>
+<div class="highlight"><pre><span></span><span class="n">setSupportActionBar</span><span class="o">(</span><span class="n">toolbar</span><span class="o">);</span>
+
+<span class="o">...</span>
+
+<span class="c1">// Menu item click 的監聽事件一樣要設定在 setSupportActionBar 才有作用</span>
+<span class="n">toolbar</span><span class="o">.</span><span class="na">setOnMenuItemClickListener</span><span class="o">(</span><span class="n">onMenuItemClick</span><span class="o">);</span>
+</pre></div>
+
+
+<p>和 setNavigationIcon 一样，需要將之设定在 setSupportActionBar 之后才有作用。执行上面的代码便会得到下面的界面。</p>
+<p><img alt="Toolbar-Component-Click是-168x300.png" src="http://www.jcodecraeer.com/uploads/20141118/14162860447819.png" /></p>
+<h5>4. 总结</h5>
+<p>在这样的架构设计下，ToolBar直接成了Layout中可以控制的东西，相对于过去的actionbar来说，设计与可操控性大幅提升。</p>
+<p>本文上面的解释中用到的完成代码：toolbar demo check point 0 ~ 4，请到<a href="https://github.com/mosil/Android-Mosil-Sample-Toolbar">Github</a> 取得。</p>
+<p>最后再附上一个界面上常用的属性说明图：</p>
+<p><img alt="Component-Theme1-168x300.png" src="http://www.jcodecraeer.com/uploads/20141118/14162861629057.png" /></p>
+<p>这里按照图中从上到下的顺序做个简单的说明：</p>
+<ul>
+<li>
+<p>colorPrimaryDark</p>
+</li>
+<li>
+<ul>
+<li>状态栏背景色。</li>
+</ul>
+</li>
+<li>
+<p>在 style 的属性中设置。</p>
+</li>
+<li>
+<p>textColorPrimary</p>
+</li>
+<li>
+<ul>
+<li>App bar 上的标题与更多菜单中的文字颜色。</li>
+</ul>
+</li>
+<li>
+<p>在 style 的属性中设置。</p>
+</li>
+<li>
+<p>App bar 的背景色</p>
+</li>
+<li>
+<ul>
+<li>Actionbar 的背景色设定在 style 中的 colorPrimary。</li>
+</ul>
+</li>
+<li>
+<p>Toolbar 的背景色在layout文件中设置background属性。</p>
+</li>
+<li>
+<p>colorAccent</p>
+</li>
+<li>
+<ul>
+<li>各控制元件(如：check box、switch 或是 radoi) 被勾选 (checked) 或是选定 (selected) 的颜色。</li>
+</ul>
+</li>
+<li>
+<p>在 style 的属性中设置。</p>
+</li>
+<li>
+<p>colorControlNormal</p>
+</li>
+<li>
+<ul>
+<li>各控制元件的预设颜色。</li>
+</ul>
+</li>
+<li>
+<p>在 style 的属性中设置</p>
+</li>
+<li>
+<p>windowBackground</p>
+</li>
+<li>
+<ul>
+<li>App 的背景色。</li>
+</ul>
+</li>
+<li>
+<p>在 style 的属性中设置</p>
+</li>
+<li>
+<p>navigationBarColor</p>
+</li>
+<li>
+<ul>
+<li>导航栏的背景色，但只能用在 API Level 21 (Android 5) 以上的版本</li>
+</ul>
+</li>
+<li>在 style 的属性中设置</li>
+</ul>
+<p>最后需要注意的是：<font color=#ff0000>使用material主题的时候，必须设定targetSdkVersion = 21</font>，否则界面看起来是模糊的。      </p>
+<h4>android.support.v4.widget.NestedScrollView分析</h4>
+<blockquote>
+<p>Android 在发布 <code>Lollipop</code>版本之后，为了更好的用户体验，Google为Android的滑动机制提供了<code>NestedScrolling</code>特性</p>
+</blockquote>
+<p><code>NestedScrolling</code>的特性可以体现在哪里呢？
+比如你使用了<code>Toolbar</code>，下面一个<code>ScrollView</code>，向上滚动隐藏<code>Toolbar</code>，向下滚动显示<code>Toolbar</code>，这里在逻辑上就是一个<code>NestedScrolling</code> —— 因为你在滚动整个<code>Toolbar</code>在内的View的过程中，又<code>嵌套</code>滚动了里面的<code>ScrollView</code>。</p>
+<p><img alt="img" src="https://segmentfault.com/img/bVmdFl" /></p>
+<p>在这之前，我们知道<code>Android</code>对<code>Touch</code>事件的分发是有自己一套机制的。主要是有是三个函数：
+<code>dispatchTouchEvent</code>、<code>onInterceptTouchEvent</code>和<code>onTouchEvent</code>。</p>
+<p>这种分发机制有一个漏洞：</p>
+<blockquote>
+<p>如果子view获得处理touch事件机会的时候，父view就再也没有机会去处理这个touch事件了，直到下一次手指再按下。</p>
+</blockquote>
+<p>也就是说，我们在滑动子View的时候，如果子View对这个滑动事件不想要处理的时候，只能抛弃这个touch事件，而不会把这些传给父view去处理。</p>
+<p>但是Google新的<code>NestedScrolling</code>机制就很好的解决了这个问题。
+我们看看如何实现这个<code>NestedScrolling</code>，首先有几个类（接口）我们需要关注一下</p>
+<blockquote>
+<p><a href="http://developer.android.com/reference/android/support/v4/view/NestedScrollingChild.html">NestedScrollingChild</a>
+<a href="http://developer.android.com/reference/android/support/v4/view/NestedScrollingParent.html">NestedScrollingParent</a>
+<a href="http://developer.android.com/reference/android/support/v4/view/NestedScrollingChildHelper.html">NestedScrollingChildHelper</a>
+<a href="http://developer.android.com/reference/android/support/v4/view/NestedScrollingParentHelper.html">NestedScrollingParentHelper</a></p>
+</blockquote>
+<p>以上四个类都在<code>support-v4</code>包中提供，Lollipop的View默认实现了几种方法。
+实现接口很简单，这边我暂时用到了<code>NestedScrollingChild</code>系列的方法（因为Parent是support-design提供的<code>CoordinatorLayout</code>）</p>
+<div class="highlight"><pre><span></span>    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setNestedScrollingEnabled</span><span class="o">(</span><span class="kt">boolean</span> <span class="n">enabled</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kd">super</span><span class="o">.</span><span class="na">setNestedScrollingEnabled</span><span class="o">(</span><span class="n">enabled</span><span class="o">);</span>
+        <span class="n">mChildHelper</span><span class="o">.</span><span class="na">setNestedScrollingEnabled</span><span class="o">(</span><span class="n">enabled</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isNestedScrollingEnabled</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">mChildHelper</span><span class="o">.</span><span class="na">isNestedScrollingEnabled</span><span class="o">();</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">startNestedScroll</span><span class="o">(</span><span class="kt">int</span> <span class="n">axes</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">mChildHelper</span><span class="o">.</span><span class="na">startNestedScroll</span><span class="o">(</span><span class="n">axes</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">stopNestedScroll</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">mChildHelper</span><span class="o">.</span><span class="na">stopNestedScroll</span><span class="o">();</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">hasNestedScrollingParent</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">mChildHelper</span><span class="o">.</span><span class="na">hasNestedScrollingParent</span><span class="o">();</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">dispatchNestedScroll</span><span class="o">(</span><span class="kt">int</span> <span class="n">dxConsumed</span><span class="o">,</span> <span class="kt">int</span> <span class="n">dyConsumed</span><span class="o">,</span> <span class="kt">int</span> <span class="n">dxUnconsumed</span><span class="o">,</span> <span class="kt">int</span> <span class="n">dyUnconsumed</span><span class="o">,</span> <span class="kt">int</span><span class="o">[]</span> <span class="n">offsetInWindow</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">mChildHelper</span><span class="o">.</span><span class="na">dispatchNestedScroll</span><span class="o">(</span><span class="n">dxConsumed</span><span class="o">,</span> <span class="n">dyConsumed</span><span class="o">,</span> <span class="n">dxUnconsumed</span><span class="o">,</span> <span class="n">dyUnconsumed</span><span class="o">,</span> <span class="n">offsetInWindow</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">dispatchNestedPreScroll</span><span class="o">(</span><span class="kt">int</span> <span class="n">dx</span><span class="o">,</span> <span class="kt">int</span> <span class="n">dy</span><span class="o">,</span> <span class="kt">int</span><span class="o">[]</span> <span class="n">consumed</span><span class="o">,</span> <span class="kt">int</span><span class="o">[]</span> <span class="n">offsetInWindow</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">mChildHelper</span><span class="o">.</span><span class="na">dispatchNestedPreScroll</span><span class="o">(</span><span class="n">dx</span><span class="o">,</span> <span class="n">dy</span><span class="o">,</span> <span class="n">consumed</span><span class="o">,</span> <span class="n">offsetInWindow</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">dispatchNestedFling</span><span class="o">(</span><span class="kt">float</span> <span class="n">velocityX</span><span class="o">,</span> <span class="kt">float</span> <span class="n">velocityY</span><span class="o">,</span> <span class="kt">boolean</span> <span class="n">consumed</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">mChildHelper</span><span class="o">.</span><span class="na">dispatchNestedFling</span><span class="o">(</span><span class="n">velocityX</span><span class="o">,</span> <span class="n">velocityY</span><span class="o">,</span> <span class="n">consumed</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">dispatchNestedPreFling</span><span class="o">(</span><span class="kt">float</span> <span class="n">velocityX</span><span class="o">,</span> <span class="kt">float</span> <span class="n">velocityY</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">mChildHelper</span><span class="o">.</span><span class="na">dispatchNestedPreFling</span><span class="o">(</span><span class="n">velocityX</span><span class="o">,</span> <span class="n">velocityY</span><span class="o">);</span>
+    <span class="o">}</span>
+</pre></div>
+
+
+<p>对，简单的话你就这么实现就好了。</p>
+<p>这些接口都是我们在需要的时候自己调用的。childHelper干了些什么事呢？，看一下<code>startNestedScroll</code>方法</p>
+<div class="highlight"><pre><span></span>    <span class="cm">/**</span>
+<span class="cm">     * Start a new nested scroll for this view.</span>
+<span class="cm">     *</span>
+<span class="cm">     * &lt;p&gt;This is a delegate method. Call it from your {@link android.view.View View} subclass</span>
+<span class="cm">     * method/{@link NestedScrollingChild} interface method with the same signature to implement</span>
+<span class="cm">     * the standard policy.&lt;/p&gt;</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param axes Supported nested scroll axes.</span>
+<span class="cm">     *             See {@link NestedScrollingChild#startNestedScroll(int)}.</span>
+<span class="cm">     * @return true if a cooperating parent view was found and nested scrolling started successfully</span>
+<span class="cm">     */</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">startNestedScroll</span><span class="o">(</span><span class="kt">int</span> <span class="n">axes</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">hasNestedScrollingParent</span><span class="o">())</span> <span class="o">{</span>
+            <span class="c1">// Already in progress</span>
+            <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">isNestedScrollingEnabled</span><span class="o">())</span> <span class="o">{</span>
+            <span class="n">ViewParent</span> <span class="n">p</span> <span class="o">=</span> <span class="n">mView</span><span class="o">.</span><span class="na">getParent</span><span class="o">();</span>
+            <span class="n">View</span> <span class="n">child</span> <span class="o">=</span> <span class="n">mView</span><span class="o">;</span>
+            <span class="k">while</span> <span class="o">(</span><span class="n">p</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">ViewParentCompat</span><span class="o">.</span><span class="na">onStartNestedScroll</span><span class="o">(</span><span class="n">p</span><span class="o">,</span> <span class="n">child</span><span class="o">,</span> <span class="n">mView</span><span class="o">,</span> <span class="n">axes</span><span class="o">))</span> <span class="o">{</span>
+                    <span class="n">mNestedScrollingParent</span> <span class="o">=</span> <span class="n">p</span><span class="o">;</span>
+                    <span class="n">ViewParentCompat</span><span class="o">.</span><span class="na">onNestedScrollAccepted</span><span class="o">(</span><span class="n">p</span><span class="o">,</span> <span class="n">child</span><span class="o">,</span> <span class="n">mView</span><span class="o">,</span> <span class="n">axes</span><span class="o">);</span>
+                    <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+                <span class="o">}</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">p</span> <span class="k">instanceof</span> <span class="n">View</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">child</span> <span class="o">=</span> <span class="o">(</span><span class="n">View</span><span class="o">)</span> <span class="n">p</span><span class="o">;</span>
+                <span class="o">}</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="na">getParent</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="kc">false</span><span class="o">;</span>
+    <span class="o">}</span>
+</pre></div>
+
+
+<p>可以看到这里是帮你实现一些跟<code>NestedScrollingParent</code>交互的一些方法。
+<code>ViewParentCompat</code>是一个和父view交互的兼容类，它会判断api version，如果在Lollipop以上，就是用view自带的方法，否则判断是否实现了<code>NestedScrollingParent</code>接口，去调用接口的方法。</p>
+<p>那么具体我们怎么使用这一套机制呢？比如子View这时候我需要通知父view告诉它我有一个嵌套的touch事件需要我们共同处理。那么针对一个只包含scroll交互，它整个工作流是这样的：</p>
+<h5>一、startNestedScroll</h5>
+<p>首先子view需要开启整个流程（内部主要是找到合适的能接受nestedScroll的parent），通知父View，我要和你配合处理TouchEvent</p>
+<h5>二、dispatchNestedPreScroll</h5>
+<p>在子View的<code>onInterceptTouchEvent</code>或者<code>onTouch</code>中(一般在MontionEvent.ACTION_MOVE事件里)，调用该方法通知父View滑动的距离。该方法的第三第四个参数返回父view消费掉的scroll长度和子View的窗体偏移量。如果这个scroll没有被消费完，则子view进行处理剩下的一些距离，<strong>由于窗体进行了移动，如果你记录了手指最后的位置，需要根据第四个参数offsetInWindow计算偏移量，才能保证下一次的touch事件的计算是正确的。</strong>
+如果父view接受了它的滚动参数，进行了部分消费，则这个函数返回true，否则为false。
+这个函数一般在子view处理scroll前调用。</p>
+<h5>三、dispatchNestedScroll</h5>
+<p>向父view汇报滚动情况，包括子view消费的部分和子view没有消费的部分。
+如果父view接受了它的滚动参数，进行了部分消费，则这个函数返回true，否则为false。
+这个函数一般在子view处理scroll后调用。</p>
+<h5>四、stopNestedScroll</h5>
+<p>结束整个流程。</p>
+<p>整个对应流程是这样</p>
+<table>
+<thead>
+<tr>
+<th>子view</th>
+<th>父view</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>startNestedScroll</td>
+<td>onStartNestedScroll、onNestedScrollAccepted</td>
+</tr>
+<tr>
+<td>dispatchNestedPreScroll</td>
+<td>onNestedPreScroll</td>
+</tr>
+<tr>
+<td>dispatchNestedScroll</td>
+<td>onNestedScroll</td>
+</tr>
+<tr>
+<td>stopNestedScroll</td>
+<td>onStopNestedScroll</td>
+</tr>
+</tbody>
+</table>
+<p>一般是子view发起调用，父view接受回调。</p>
+<p>我们最需要关注的是<code>dispatchNestedPreScroll</code>中的<code>consumed</code>参数。</p>
+<div class="highlight"><pre><span></span>    public boolean dispatchNestedPreScroll(int dx, int dy, int[] consumed, int[] offsetInWindow) ;
+</pre></div>
+
+
+<p>它是一个<code>int</code>型的数组，长度为2，第一个元素是父view消费的<code>x</code>方向的滚动距离；第二个元素是父view消费的<code>y</code>方向的滚动距离，如果这两个值不为0，则子view需要对滚动的量进行一些修正。正因为有了这个参数，使得我们处理滚动事件的时候，思路更加清晰，不会像以前一样被一堆的滚动参数搞混。</p>
+<hr />
+<p>对NestedScroll的介绍暂时到这里，下一次将讲一下<code>CoordinatorLayout</code>的使用（其中让人较难理解的Behavior对象），以及在<code>SegmentFault Android客户端</code>中的实践。谢谢支持。</p>
+<h4>android.support.v7.widget.CardView分析</h4>
+<p>从本质上看，可以将CardView看做是FrameLayout在自身之上添加了圆角和阴影效果。</p>
+<div class="highlight"><pre><span></span>app:cardElevation=&quot;8dp&quot;
+app:contentPadding=&quot;16dp&quot;
+</pre></div>
+
+
+<p>CardView提供了一个默认的elevation（意为CardView的Z轴阴影）和圆角角度，所以每一个卡片都能够在不同的设备上保持相同的外观。</p>
+<p>注意：cardElevation属性被用来决定阴影的大小以及柔和度，以至于可以逼真的模拟出对于深度效果的描述。</p>
+<h5>CardView新增属性</h5>
+<ul>
+<li>CardView_cardBackgroundColor 设置背景色</li>
+<li>CardView_cardCornerRadius 设置圆角大小</li>
+<li>CardView_cardElevation 设置z轴阴影</li>
+<li>CardView_cardMaxElevation 设置z轴最大高度值</li>
+<li>CardView_cardUseCompatPadding 是否使用CompadPadding</li>
+<li>CardView_cardPreventCornerOverlap 是否使用PreventCornerOverlap</li>
+<li>CardView_contentPadding 内容的padding</li>
+<li>CardView_contentPaddingLeft 内容的左padding</li>
+<li>CardView_contentPaddingTop 内容的上padding</li>
+<li>CardView_contentPaddingRight 内容的右padding</li>
+<li>CardView_contentPaddingBottom 内容的底padding</li>
+</ul>
+<p>card_view:cardUseCompatPadding 设置内边距，V21+的版本和之前的版本仍旧具有一样的计算方式</p>
+<p>card_view:cardPreventConrerOverlap 在V20和之前的版本中添加内边距，这个属性为了防止内容和边角的重叠</p>
+<h5>添加波纹点击效果</h5>
+<p>默认情况，CardView是不可点击的，并且没有任何的触摸反馈效果。触摸反馈动画在用户点击CardView时可以给用户以视觉上的反馈。为了实现这种行为，你必须提供一下属性：</p>
+<div class="highlight"><pre><span></span><span class="nt">&lt;android.support.v7.widget.CardView</span>
+  <span class="err">...</span>
+  <span class="na">android:clickable=</span><span class="s">&quot;true&quot;</span>
+  <span class="na">android:foreground=</span><span class="s">&quot;?android:attr/selectableItemBackground&quot;</span><span class="nt">&gt;</span>
+  ...
+<span class="nt">&lt;/android.support.v7.widget.CardView&gt;</span>
+</pre></div>
+
+
+<p>使用android:foreground=”?android:attr/selectableItemBackground”可以使CardView点击产生波纹的效果，有触摸点向外扩散。</p>
+<h5>对更早的版本的支持</h5>
+<p>在AndroidL之前的设备上，CardView为了支持圆角的效果加上了padding，圆角剪裁操作可以算是很昂贵的操作。相似的，对阴影效果来说，在AndroidL之前，也会提供padding去绘制阴影面积，这些内容的padding是和elevation属性相关的，按照文档：</p>
+<blockquote>
+<p>padding值为： 
+左右两边的值为:maxCardElevation + (1 - cos45) * cornerRadius 
+上下两边的值为：maxCardElevation * 1.5 + (1 - cos45) * cornerRadius</p>
+</blockquote>
+<p>因此，如果你需要给自己的内容加上padding的话，需要使用新的属性：card_view:contentPadding 
+相似的，如果改变CardView的背景，也需要使用新的属性：card_view:cardBackgroundColor</p>
+<h4>android.support.design.widget.CollapsingToolbarLayout分析（可伸缩折叠的Toolbar ）</h4>
+<p>由名字可知，功能为可伸缩折叠的Toolbar （Collapsing Toolbar）。直接添加Toolbar到AppBarLayout可以让你使用enterAlwaysCollapsed 和 exitUntilCollapsedscroll标志，但是无法控制不同元素如何响应collapsing的细节，为了达到此目的，使用<a href="http://developer.android.com/reference/android/support/design/widget/CollapsingToolbarLayout.html?utm_campaign=io15&amp;utm_source=dac&amp;utm_medium=blog">CollapsingToolbarLayout</a>：</p>
+<div class="highlight"><pre><span></span><span class="nt">&lt;android.support.design.widget.AppBarLayout</span>
+        <span class="na">android:layout_height=</span><span class="s">&quot;192dp&quot;</span>
+        <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;android.support.design.widget.CollapsingToolbarLayout</span>
+            <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+            <span class="na">android:layout_height=</span><span class="s">&quot;match_parent&quot;</span>
+            <span class="na">app:layout_scrollFlags=</span><span class="s">&quot;scroll|exitUntilCollapsed&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;android.support.v7.widget.Toolbar</span>
+                <span class="na">android:layout_height=</span><span class="s">&quot;?attr/actionBarSize&quot;</span>
+                <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+                <span class="na">app:layout_collapseMode=</span><span class="s">&quot;pin&quot;</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;/android.support.design.widget.CollapsingToolbarLayout&gt;</span>
+<span class="nt">&lt;/android.support.design.widget.AppBarLayout&gt;</span>
+</pre></div>
+
+
+<p>这里使用了CollapsingToolbarLayout的app:layout_collapseMode="pin"来确保Toolbar在view折叠的时候仍然被固定在屏幕的顶部。还可以做到更好的效果，当你让CollapsingToolbarLayout和Toolbar在一起使用的时候，title会在展开的时候自动变得大些，而在折叠的时候让字体过渡到默认值。<code>必须注意，在这种情况下你必须在CollapsingToolbarLayout上调用setTitle()，而不是在Toolbar上</code>。</p>
+<p><img alt="" src="http://www.jcodecraeer.com/uploads/20150530/1433000848139569.gif" /></p>
+<p>除了固定住view，你还可以使用app:layout_collapseMode="parallax"（以及使用app:layout_collapseParallaxMultiplier="0.7"来设置视差因子）来实现视差滚动效果（比如CollapsingToolbarLayout里面的一个ImageView），这中情况和CollapsingToolbarLayout的app:contentScrim="?attr/colorPrimary"属性一起配合更完美。</p>
+<p><img alt="" src="http://www.jcodecraeer.com/uploads/150531/1-150531004140C1.gif" /></p>
+<h5>CollapsingToolbarLayout常见的属性设置：</h5>
+<ul>
+<li>app:contentScrim=”@color/colorPrimary”：设置当CollapsingToolbarLayout完全折叠（收缩）后的背景颜色； </li>
+<li>app:expandedTitleMarginStart=”48dp”：设置CollapsingToolbarLayout处于扩张时（未收缩）时，title距离左边的距离； </li>
+<li>app:layout_scrollFlags=”scroll|exitUntilCollapsed”：设置滚动标志，这里面有几个值： </li>
+<li>scroll：想滚动就必须设置这个。 </li>
+<li>enterAlways：实现quick return效果, 当向下移动时，立即显示View（比如Toolbar)。 </li>
+<li>exitUntilCollapsed：向上滚动时收缩View时，Toolbar一直固定在上面。 </li>
+<li>enterAlwaysCollapsed：当你的View已经设置minHeight属性又使用此标志时，你的View只能以最小高度进入，只有当滚动视图到达顶部时才扩大到完整高度。</li>
+</ul>
+<h5>附五种ScrollFlags</h5>
+<ul>
+<li>scroll
+   Child View 伴随着滚动事件而滚出或滚进屏幕。
+   注意两点：
+   第一点，如果使用了其他值，必定要使用这个值才能起作用；
+   第二点：如果在这个child View前面的任何其他Child View没有设置这个值，那么这个Child View的设置将失去作用。
+   示例XML代码：</li>
+</ul>
+<div class="highlight"><pre><span></span>   <span class="nt">&lt;android.support.design.widget.AppBarLayout</span>
+          <span class="na">android:id=</span><span class="s">&quot;@+id/appbar&quot;</span>
+          <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+          <span class="na">android:layout_height=</span><span class="s">&quot;wrap_content&quot;</span>
+          <span class="na">android:theme=</span><span class="s">&quot;@style/ThemeOverlay.AppCompat.Dark.ActionBar&quot;</span><span class="nt">&gt;</span>
+
+          <span class="nt">&lt;android.support.v7.widget.Toolbar</span>
+              <span class="na">xmlns:app=</span><span class="s">&quot;http://schemas.android.com/apk/res-auto&quot;</span>
+              <span class="na">android:id=</span><span class="s">&quot;@+id/tb_toolbar&quot;</span>
+              <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+              <span class="na">android:layout_height=</span><span class="s">&quot;@dimen/dp_56&quot;</span>
+              <span class="na">app:titleTextColor=</span><span class="s">&quot;@color/white&quot;</span>
+              <span class="na">app:title=</span><span class="s">&quot;@string/app_name&quot;</span>
+              <span class="na">app:theme=</span><span class="s">&quot;@style/OverFlowMenuTheme&quot;</span>
+              <span class="na">app:popupTheme=</span><span class="s">&quot;@style/AppTheme&quot;</span>
+              <span class="na">android:background=</span><span class="s">&quot;@color/blue&quot;</span>
+              <span class="na">app:layout_scrollFlags=</span><span class="s">&quot;scroll|enterAlways&quot;</span><span class="nt">/&gt;</span>
+
+      <span class="nt">&lt;/android.support.design.widget.AppBarLayout&gt;</span>
+</pre></div>
+
+
+<p>对应效果图：</p>
+<p><img alt="" src="http://upload-images.jianshu.io/upload_images/1094967-877bd6d61a4e22f9.gif?imageMogr2/auto-orient/strip" /></p>
+<ul>
+<li>enterAlways
+  快速返回模式。其实就是向下滚动时Scrolling View和Child View之间的滚动优先级问题。对比<code>scroll</code>和<code>scroll | enterAlways</code>设置，发生向下滚动事件时，前者优先滚动Scrolling View，后者优先滚动Child View，当优先滚动的一方已经全部滚进屏幕之后，另一方才开始滚动。
+  示例XML代码：</li>
+</ul>
+<p><code>xml
+  ...
+  app:layout_scrollFlags="scroll|enterAlways"
+  ...</code></p>
+<p>对应效果图：
+  <img alt="" src="http://upload-images.jianshu.io/upload_images/1094967-e0873ea34c4637a5.gif?imageMogr2/auto-orient/strip" /></p>
+<ul>
+<li>enterAlwaysCollapsed
+  enterAlways的附加值。这里涉及到Child View的高度和最小高度，向下滚动时，Child View先向下滚动最小高度值，然后Scrolling View开始滚动，到达边界时，Child View再向下滚动，直至显示完全。
+  示例XML代码：</li>
+</ul>
+<p><code>xml
+  ...
+  android:layout_height="@dimen/dp_200"
+  android:minHeight="@dimen/dp_56"
+  ...
+  app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed"
+  ...</code></p>
+<p>对应效果图：
+  <img alt="" src="http://upload-images.jianshu.io/upload_images/1094967-4ab6365b7fac590e.gif?imageMogr2/auto-orient/strip" /></p>
+<ul>
+<li>exitUntilCollapsed
+  这里也涉及到最小高度。发生向上滚动事件时，Child View向上滚动退出直至最小高度，然后Scrolling View开始滚动。也就是，Child View不会完全退出屏幕。
+  示例SML代码：</li>
+</ul>
+<p><code>xml
+  ...
+  android:layout_height="@dimen/dp_200"
+  android:minHeight="@dimen/dp_56"
+  ...
+  app:layout_scrollFlags="scroll|exitUntilCollapsed"
+  ...</code></p>
+<p>对应效果图：</p>
+<p><img alt="" src="http://upload-images.jianshu.io/upload_images/1094967-6f683857f6d567ca.gif?imageMogr2/auto-orient/strip" /></p>
+<ul>
+<li>snap
+  简单理解，就是Child View滚动比例的一个吸附效果。也就是说，Child View不会存在局部显示的情况，滚动Child View的部分高度，当我们松开手指时，Child View要么向上全部滚出屏幕，要么向下全部滚进屏幕，有点类似ViewPager的左右滑动。
+  示例XML代码：</li>
+</ul>
+<p><code>xml
+  ...
+  android:layout_height="@dimen/dp_200"
+  ...
+  app:layout_scrollFlags="scroll|snap"
+  ...</code></p>
+<p>对应效果图：</p>
+<p><img alt="img" src="http://upload-images.jianshu.io/upload_images/1094967-7d9619ee3fb0d974.gif?imageMogr2/auto-orient/strip" /></p>
+<h5>CollapsingToolbarLayout中子ImageView的常见设置：</h5>
+<ul>
+<li>app:layout_collapseMode=”parallax”：设置子布局设置折叠模式 </li>
+<li>parallax：视差模式，在折叠的时候会有个视差折叠的效果。 </li>
+<li>pin：固定模式，在折叠的时候最后固定在顶端 </li>
+<li>app:layout_collapseParallaxMultiplier=”0.7”：设置视差的系数，介于0.0-1.0之间。</li>
+</ul>
+<h5>CollapsingToolbarLayout中Toolbar的设置：</h5>
+<ul>
+<li>app:layout_collapseMode=”pin”：当CollapsingToolbarLayout完全收缩后， Toolbar还可以保留在屏幕上。</li>
+</ul>
+<p>注： </p>
+<ol>
+<li>使用CollapsingToolbarLayout时，必须把title设置到CollapsingToolbarLayout上，如果设置在Toolbar上不显示。 </li>
+<li>设置title的字体颜色： 
+   扩张时候的title颜色：mCollapsingToolbarLayout.setExpandedTitleColor(); 
+   收缩后在Toolbar上显示时的title的颜色：mCollapsingToolbarLayout.setCollapsedTitleTextColor();</li>
+</ol>
+<h4>android.support.design.widget.AppBarLayout分析</h4>
+<p>AppBarLayout 是继承LinerLayout实现的一个ViewGroup容器组件, 
+默认的AppBarLayout是垂直方向的, 可以管理其中的控件在内容滚动时的行为。</p>
+<p>这听起来可能有点令人困惑，我想一张图片可以胜过千言万语，特别时GIF图片： 
+<img alt="这里写图片描述" src="http://img.blog.csdn.net/20160612160043029" /></p>
+<p>AppBarLayout在这个例子中时蓝色的View，在其下放置了一个可以缩放的图片，其中包含一个Toolbar， 
+一个LinearLayout（包含标题和副标题），以及一个TabLayout。</p>
+<p>我们可以通过设置layout_scrollFlags参数，来控制AppBarLayout中的控件行为。 
+在我们的这个例子中，大部分View的layout_scrollFlags都设置为scroll，如果没有设置的话， 
+当可滚动的View进行滚动时，这些没设置为scroll的View位置会保持不变；</p>
+<p>layout_scrollFlags设置上snap值则可以避免进入动画中间状态（ mid-animation-states）， 
+这意味着动画会一直持续到View完全显示或完全隐藏为止。</p>
+<p>LinearLayout其中包含了一个标题和一个副标题，当用户向上移动时LinearLayout是一直显示的，直到移出屏幕（enterAlways）;</p>
+<p>TabLayout会一直是可见的，因为我们没有在TabLayout上设置任何flag。</p>
+<p>正如你所见，AppbarLayout的强大管理能力是通过在View上设置不同scroll flags实现的。</p>
+<div class="highlight"><pre><span></span><span class="nt">&lt;AppBarLayout&gt;</span>
+    <span class="nt">&lt;CollapsingToolbarLayout</span>
+        <span class="na">app:layout_scrollFlags=</span><span class="s">&quot;scroll|snap&quot;</span>
+        <span class="nt">/&gt;</span>
+
+    <span class="nt">&lt;Toolbar</span>
+        <span class="na">app:layout_scrollFlags=</span><span class="s">&quot;scroll|snap&quot;</span>
+        <span class="nt">/&gt;</span>
+
+    <span class="nt">&lt;LinearLayout</span>
+        <span class="na">android:id=</span><span class="s">&quot;+id/title_container&quot;</span>
+        <span class="na">app:layout_scrollFlags=</span><span class="s">&quot;scroll|enterAlways&quot;</span>
+        <span class="nt">/&gt;</span>
+
+    <span class="nt">&lt;TabLayout</span> <span class="nt">/&gt;</span> <span class="c">&lt;!-- no flags --&gt;</span>
+<span class="nt">&lt;/AppBarLayout&gt;</span>
+</pre></div>
+
+
+<p>这些参数的设置请参考 Google Developers docs。 
+不过我建议还是通过代码练习来掌握它。我在文章的末尾提供了几个Github上的例子。</p>
+<h4>android.support.design.widget.CoordinatorLayout分析</h4>
+<p>顾名思义，这个控件的目的就是协调它里面View的行为。</p>
+<p>请看下面的图片： 
+<img alt="这里写图片描述" src="http://img.blog.csdn.net/20160612155757838" /></p>
+<p>在这个例子中我们可以看到View之间是如何相互配合的，View会根据其他View的变动做相应的变化。</p>
+<p>以下是CoordinatorLayout的简单使用例子：</p>
+<div class="highlight"><pre><span></span><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
+
+<span class="nt">&lt;android.support.design.widget.CoordinatorLayout</span>
+    <span class="na">xmlns:android=</span><span class="s">&quot;http://schemas.android.com/apk/res/android&quot;</span>
+    <span class="na">xmlns:app=</span><span class="s">&quot;http://schemas.android.com/apk/res-auto&quot;</span>
+    <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+    <span class="na">android:layout_height=</span><span class="s">&quot;match_parent&quot;</span>
+    <span class="na">android:background=</span><span class="s">&quot;@android:color/background_light&quot;</span>
+    <span class="na">android:fitsSystemWindows=</span><span class="s">&quot;true&quot;</span>
+    <span class="nt">&gt;</span>
+
+    <span class="nt">&lt;android.support.design.widget.AppBarLayout</span>
+        <span class="na">android:id=</span><span class="s">&quot;@+id/main.appbar&quot;</span>
+        <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+        <span class="na">android:layout_height=</span><span class="s">&quot;300dp&quot;</span>
+        <span class="na">android:theme=</span><span class="s">&quot;@style/ThemeOverlay.AppCompat.Dark.ActionBar&quot;</span>
+        <span class="na">android:fitsSystemWindows=</span><span class="s">&quot;true&quot;</span>
+        <span class="nt">&gt;</span>
+
+        <span class="nt">&lt;android.support.design.widget.CollapsingToolbarLayout</span>
+            <span class="na">android:id=</span><span class="s">&quot;@+id/main.collapsing&quot;</span>
+            <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+            <span class="na">android:layout_height=</span><span class="s">&quot;match_parent&quot;</span>
+            <span class="na">app:layout_scrollFlags=</span><span class="s">&quot;scroll|exitUntilCollapsed&quot;</span>
+            <span class="na">android:fitsSystemWindows=</span><span class="s">&quot;true&quot;</span>
+            <span class="na">app:contentScrim=</span><span class="s">&quot;?attr/colorPrimary&quot;</span>
+            <span class="na">app:expandedTitleMarginStart=</span><span class="s">&quot;48dp&quot;</span>
+            <span class="na">app:expandedTitleMarginEnd=</span><span class="s">&quot;64dp&quot;</span>
+            <span class="nt">&gt;</span>
+
+            <span class="nt">&lt;ImageView</span>
+                <span class="na">android:id=</span><span class="s">&quot;@+id/main.backdrop&quot;</span>
+                <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+                <span class="na">android:layout_height=</span><span class="s">&quot;match_parent&quot;</span>
+                <span class="na">android:scaleType=</span><span class="s">&quot;centerCrop&quot;</span>
+                <span class="na">android:fitsSystemWindows=</span><span class="s">&quot;true&quot;</span>
+                <span class="na">android:src=</span><span class="s">&quot;@drawable/material_flat&quot;</span>
+                <span class="na">app:layout_collapseMode=</span><span class="s">&quot;parallax&quot;</span>
+                <span class="nt">/&gt;</span>
+
+            <span class="nt">&lt;android.support.v7.widget.Toolbar</span>
+                <span class="na">android:id=</span><span class="s">&quot;@+id/main.toolbar&quot;</span>
+                <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+                <span class="na">android:layout_height=</span><span class="s">&quot;?attr/actionBarSize&quot;</span>
+                <span class="na">app:popupTheme=</span><span class="s">&quot;@style/ThemeOverlay.AppCompat.Light&quot;</span>
+                <span class="na">app:layout_collapseMode=</span><span class="s">&quot;pin&quot;</span>
+                <span class="nt">/&gt;</span>
+        <span class="nt">&lt;/android.support.design.widget.CollapsingToolbarLayout&gt;</span>
+    <span class="nt">&lt;/android.support.design.widget.AppBarLayout&gt;</span>
+
+    <span class="nt">&lt;android.support.v4.widget.NestedScrollView</span>
+        <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+        <span class="na">android:layout_height=</span><span class="s">&quot;match_parent&quot;</span>
+        <span class="na">app:layout_behavior=</span><span class="s">&quot;@string/appbar_scrolling_view_behavior&quot;</span>
+        <span class="nt">&gt;</span>
+
+        <span class="nt">&lt;TextView</span>
+            <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+            <span class="na">android:layout_height=</span><span class="s">&quot;wrap_content&quot;</span>
+            <span class="na">android:textSize=</span><span class="s">&quot;20sp&quot;</span>
+            <span class="na">android:lineSpacingExtra=</span><span class="s">&quot;8dp&quot;</span>
+            <span class="na">android:text=</span><span class="s">&quot;@string/lorem&quot;</span>
+            <span class="na">android:padding=</span><span class="s">&quot;@dimen/activity_horizontal_margin&quot;</span>
+            <span class="nt">/&gt;</span>
+    <span class="nt">&lt;/android.support.v4.widget.NestedScrollView&gt;</span>
+
+    <span class="nt">&lt;android.support.design.widget.FloatingActionButton</span>
+        <span class="na">android:layout_height=</span><span class="s">&quot;wrap_content&quot;</span>
+        <span class="na">android:layout_width=</span><span class="s">&quot;wrap_content&quot;</span>
+        <span class="na">android:layout_margin=</span><span class="s">&quot;@dimen/activity_horizontal_margin&quot;</span>
+        <span class="na">android:src=</span><span class="s">&quot;@drawable/ic_comment_24dp&quot;</span>
+        <span class="na">app:layout_anchor=</span><span class="s">&quot;@id/main.appbar&quot;</span>
+        <span class="na">app:layout_anchorGravity=</span><span class="s">&quot;bottom|right|end&quot;</span>
+        <span class="nt">/&gt;</span>
+<span class="nt">&lt;/android.support.design.widget.CoordinatorLayout&gt;</span>
+</pre></div>
+
+
+<p>我们看一下这个layout结构，CoordinatorLayout包含3个子控件： 
+AppbarLayout， scrolleable view 和 anchoredFloatingActionBar。</p>
+<div class="highlight"><pre><span></span><span class="nt">&lt;CoordinatorLayout&gt;</span>
+    <span class="nt">&lt;AppbarLayout/&gt;</span>
+    <span class="nt">&lt;scrollableView/&gt;</span>
+    <span class="nt">&lt;FloatingActionButton/&gt;</span>
+<span class="nt">&lt;/CoordinatorLayout&gt;</span>
+</pre></div></div>
+	
+        <hr>
+
+    </div>
+        </div>
+        
+        <div class="span3">
+
+            <div class="well" style="padding: 8px 0; background-color: #FBFBFB;">
+            <ul class="nav nav-list">
+                <li class="nav-header"> 
+                Site
+                </li>
+            
+                <li><a href="/archives.html">Archives</a>
+                <li><a href="/tags.html">Tags</a>
+
+
+
+
+            </ul>
+            </div>
+
+
+            <div class="well" style="padding: 8px 0; background-color: #FBFBFB;">
+            <ul class="nav nav-list">
+                <li class="nav-header"> 
+                Categories
+                </li>
+                
+                <li><a href="/android-animation/index.html">Android Animation</a></li>
+                <li><a href="/android-material-design/index.html">Android Material Design</a></li>
+                <li><a href="/misc/index.html">misc</a></li>
+                <li><a href="/xian-cheng/index.html">线程</a></li>
+                   
+            </ul>
+            </div>
+            
+
+
+            <div class="well" style="padding: 8px 0; background-color: #FBFBFB;">
+            <ul class="nav nav-list">
+                <li class="nav-header"> 
+                Links
+                </li>
+            
+                <li><a href="http://getpelican.com/">Pelican</a></li>
+                <li><a href="http://python.org/">Python.org</a></li>
+                <li><a href="http://jinja.pocoo.org/">Jinja2</a></li>
+            </ul>
+            </div>
+
+
+            <div class="social">
+            <div class="well" style="padding: 8px 0; background-color: #FBFBFB;">
+            <ul class="nav nav-list">
+                <li class="nav-header"> 
+                Social
+                </li>
+           
+                <li><a href="https://www.infoq.com/">InfoQ</a></li>
+                <li><a href="http://gityuan.com/">Gityuan</a></li>
+            </ul>
+            </div>
+            </div>
+
+        </div>  
+    </div>     </div> 
+<footer>
+<br />
+<p><a href="">tuyc</a> &copy; tuyc 2016</p>
+</footer>
+
+</div> <!-- /container -->
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script src="/theme/bootstrap-collapse.js"></script>
+ 
+</body>
+</html>
