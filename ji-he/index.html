@@ -449,18 +449,18 @@ public V get(Object key) {
 <ul>
 <li>put函数</li>
 </ul>
-<p>```<br />
-  if (key == null)
+<p>```</p>
+<p>if (key == null)
           return putForNullKey(value);   </p>
 <p>```</p>
 <p>由此可知key可以为空。  </p>
-<p>```<br />
-  int hash = sun.misc.Hashing.singleWordWangJenkinsHash(key);
+<p>```</p>
+<p>int hash = sun.misc.Hashing.singleWordWangJenkinsHash(key);
   int i = indexFor(hash, table.length);</p>
 <p>```</p>
 <p>hash的的算法不用care，只要理解根据key得到hash值即可；再根据hash值，<code>indexFor(int h, int length)</code>计算桶（数组）的下标；这一步任务就是定位桶的下标。</p>
-<p>```
-  for (HashMapEntry<K,V> e = table[i]; e != null; e = e.next) {
+<p>```</p>
+<p>for (HashMapEntry<K,V> e = table[i]; e != null; e = e.next) {
           Object k;
           if (e.hash == hash &amp;&amp; ((k = e.key) == key || key.equals(k))) {
               V oldValue = e.value;
@@ -471,12 +471,12 @@ public V get(Object key) {
       }</p>
 <p>```</p>
 <p>这里可以发现for循环初始值HashMapEntry<K,V> e=table[i]（i是上一步计算出的下标），HashMapEntry是一个链表结点，并拥有next结点；滑动链表结点，依次比较，当<code>e.hash == hash &amp;&amp; ((k = e.key) == key || key.equals(k))</code>条件满足就找到了相同的key，进行修改操作，否则就进行增加操作，如下：</p>
-<p>```
-  addEntry(hash, key, value, i);</p>
+<p>```</p>
+<p>addEntry(hash, key, value, i);</p>
 <p>```</p>
 <p>最后会执行到：</p>
-<p>```
-  void createEntry(int hash, K key, V value, int bucketIndex) {
+<p>```</p>
+<p>void createEntry(int hash, K key, V value, int bucketIndex) {
           HashMapEntry<K,V> e = table[bucketIndex];
           table[bucketIndex] = new HashMapEntry&lt;&gt;(hash, key, value, e);
           size++;
@@ -486,8 +486,8 @@ public V get(Object key) {
 <ul>
 <li>remove函数</li>
 </ul>
-<p>```
-  final Entry<K,V> removeEntryForKey(Object key) {
+<p>```</p>
+<p>final Entry<K,V> removeEntryForKey(Object key) {
           if (size == 0) {
               return null;
           }
