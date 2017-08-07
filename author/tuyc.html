@@ -58,8 +58,8 @@
 
     <div class='article'>
         <div class="content-title">
-            <a href="/android-animation/yeyu_animation_vo_high.html"><h1>Android ValueAnimator和ObjectAnimator高级用法</h1></a>
-六 10 十二月 2016
+            <a href="/ji-he/my-super-collection.html"><h1>Android常用数据结构解析</h1></a>
+日 06 八月 2017
 
 by <a class="url fn" href="/author/tuyc.html">tuyc</a>
  
@@ -68,7 +68,513 @@ by <a class="url fn" href="/author/tuyc.html">tuyc</a>
  
         </div>
         
-        <div><h3>ValueAnimator高级用法</h3>
+        <div><p>[TOC]</p>
+<h3>Android 常用数据结构解析</h3>
+<p>本着共同学习的原则，来一波常用数据结构源码走读。包括ArrayList、LinkedList、HashMap。对这三种常用到的数据结构进行源码分析，本次列车解析主要包含各数据集合增、删、改、查。</p>
+<h4>ArrayList</h4>
+<ul>
+<li>ArrayList是List接口的可变数组的实现。实现了所有可选列表操作，并允许包括 null 在内的所有元素。</li>
+</ul>
+<p>数据结构：</p>
+<p><img alt="" src="https://github.com/tuyc/tuyc.github.io/blob/master/images/WX20170718-171815@2x%E7%BA%BF%E6%80%A7%E5%AD%98%E5%82%A8.png?raw=true" /></p>
+<p>线性表的顺序存储结构具有两个基本特点：</p>
+<ul>
+<li>线性表中所有元素所占的存储空间是连续的；</li>
+<li>线性表中各数据元素在存储空间中是按逻辑顺序依次存放的。</li>
+</ul>
+<h5>源码</h5>
+<p>构造函数：</p>
+<div class="highlight"><pre><span></span><span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">Object</span><span class="o">[]</span> <span class="n">EMPTY_ELEMENTDATA</span> <span class="o">=</span> <span class="o">{};</span>
+<span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">DEFAULT_CAPACITY</span> <span class="o">=</span> <span class="mi">10</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="nf">ArrayList</span><span class="o">(</span><span class="kt">int</span> <span class="n">initialCapacity</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kd">super</span><span class="o">();</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">initialCapacity</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">IllegalArgumentException</span><span class="o">(</span><span class="s">&quot;Illegal Capacity: &quot;</span><span class="o">+</span>
+                                               <span class="n">initialCapacity</span><span class="o">);</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">elementData</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[</span><span class="n">initialCapacity</span><span class="o">];</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nf">ArrayList</span><span class="o">()</span> <span class="o">{</span>
+        <span class="kd">super</span><span class="o">();</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">elementData</span> <span class="o">=</span> <span class="n">EMPTY_ELEMENTDATA</span><span class="o">;</span>
+    <span class="o">}</span>    
+</pre></div>
+
+
+<p>ArrayList有两个构造函数，一种是给定初始容量，一种是默认构造。使用默认构造函数是不会分配多余的空间的，由源码<code>private static final Object[] EMPTY_ELEMENTDATA = {};</code>可以看出。而对于已分配的空间数量不够情况会怎么办呢？在元素增加（执行add方法）的时候会调用<code>ensureCapacityInternal()</code>方法进行容量检查并扩充容量。下面就来Look下add、remove、set、get方法源码：</p>
+<div class="highlight"><pre><span></span><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">add</span><span class="o">(</span><span class="n">E</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">ensureCapacityInternal</span><span class="o">(</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span><span class="o">);</span>  <span class="c1">// Increments modCount!!</span>
+    <span class="n">elementData</span><span class="o">[</span><span class="n">size</span><span class="o">++]</span> <span class="o">=</span> <span class="n">e</span><span class="o">;</span>
+    <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">add</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">,</span> <span class="n">E</span> <span class="n">element</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">index</span> <span class="o">&gt;</span> <span class="n">size</span> <span class="o">||</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">IndexOutOfBoundsException</span><span class="o">(</span><span class="n">outOfBoundsMsg</span><span class="o">(</span><span class="n">index</span><span class="o">));</span>
+        <span class="n">ensureCapacityInternal</span><span class="o">(</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span><span class="o">);</span>  <span class="c1">// Increments modCount!!</span>
+        <span class="n">System</span><span class="o">.</span><span class="na">arraycopy</span><span class="o">(</span><span class="n">elementData</span><span class="o">,</span> <span class="n">index</span><span class="o">,</span> <span class="n">elementData</span><span class="o">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="o">,</span> <span class="n">size</span> <span class="o">-</span> <span class="n">index</span><span class="o">);</span>
+        <span class="n">elementData</span><span class="o">[</span><span class="n">index</span><span class="o">]</span> <span class="o">=</span> <span class="n">element</span><span class="o">;</span>
+        <span class="n">size</span><span class="o">++;</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="n">E</span> <span class="nf">remove</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">index</span> <span class="o">&gt;=</span> <span class="n">size</span><span class="o">)</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">IndexOutOfBoundsException</span><span class="o">(</span><span class="n">outOfBoundsMsg</span><span class="o">(</span><span class="n">index</span><span class="o">));</span>
+        <span class="n">modCount</span><span class="o">++;</span>
+        <span class="n">E</span> <span class="n">oldValue</span> <span class="o">=</span> <span class="o">(</span><span class="n">E</span><span class="o">)</span> <span class="n">elementData</span><span class="o">[</span><span class="n">index</span><span class="o">];</span>
+
+        <span class="kt">int</span> <span class="n">numMoved</span> <span class="o">=</span> <span class="n">size</span> <span class="o">-</span> <span class="n">index</span> <span class="o">-</span> <span class="mi">1</span><span class="o">;</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">numMoved</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span>
+            <span class="n">System</span><span class="o">.</span><span class="na">arraycopy</span><span class="o">(</span><span class="n">elementData</span><span class="o">,</span> <span class="n">index</span><span class="o">+</span><span class="mi">1</span><span class="o">,</span> <span class="n">elementData</span><span class="o">,</span> <span class="n">index</span><span class="o">,</span> <span class="n">numMoved</span><span class="o">);</span>
+        <span class="n">elementData</span><span class="o">[--</span><span class="n">size</span><span class="o">]</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span> <span class="c1">// clear to let GC do its work</span>
+
+        <span class="k">return</span> <span class="n">oldValue</span><span class="o">;</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="n">E</span> <span class="nf">get</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">index</span> <span class="o">&gt;=</span> <span class="n">size</span><span class="o">)</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">IndexOutOfBoundsException</span><span class="o">(</span><span class="n">outOfBoundsMsg</span><span class="o">(</span><span class="n">index</span><span class="o">));</span>
+
+        <span class="k">return</span> <span class="o">(</span><span class="n">E</span><span class="o">)</span> <span class="n">elementData</span><span class="o">[</span><span class="n">index</span><span class="o">];</span>
+ <span class="o">}</span>
+
+ <span class="kd">public</span> <span class="n">E</span> <span class="nf">set</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">,</span> <span class="n">E</span> <span class="n">element</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">index</span> <span class="o">&gt;=</span> <span class="n">size</span><span class="o">)</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">IndexOutOfBoundsException</span><span class="o">(</span><span class="n">outOfBoundsMsg</span><span class="o">(</span><span class="n">index</span><span class="o">));</span>
+
+        <span class="n">E</span> <span class="n">oldValue</span> <span class="o">=</span> <span class="o">(</span><span class="n">E</span><span class="o">)</span> <span class="n">elementData</span><span class="o">[</span><span class="n">index</span><span class="o">];</span>
+        <span class="n">elementData</span><span class="o">[</span><span class="n">index</span><span class="o">]</span> <span class="o">=</span> <span class="n">element</span><span class="o">;</span>
+        <span class="k">return</span> <span class="n">oldValue</span><span class="o">;</span>
+ <span class="o">}</span>
+</pre></div>
+
+
+<p>ArrayList的数据操作都是简单的数组操作，这里主要介绍下两个方法：<code>ensureCapacityInternal</code>和<code>System.arraycopy</code>。System.arraycopy是数组操作的核心方法，理解了它你就理解了数组世界。</p>
+<h6>ensureCapacityInternal</h6>
+<div class="highlight"><pre><span></span><span class="kd">public</span> <span class="kt">void</span> <span class="nf">ensureCapacity</span><span class="o">(</span><span class="kt">int</span> <span class="n">minCapacity</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="n">minExpand</span> <span class="o">=</span> <span class="o">(</span><span class="n">elementData</span> <span class="o">!=</span> <span class="n">EMPTY_ELEMENTDATA</span><span class="o">)</span>
+            <span class="c1">// any size if real element table</span>
+            <span class="o">?</span> <span class="mi">0</span>
+            <span class="c1">// larger than default for empty table. It&#39;s already supposed to be</span>
+            <span class="c1">// at default size.</span>
+            <span class="o">:</span> <span class="n">DEFAULT_CAPACITY</span><span class="o">;</span>
+
+        <span class="k">if</span> <span class="o">(</span><span class="n">minCapacity</span> <span class="o">&gt;</span> <span class="n">minExpand</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">ensureExplicitCapacity</span><span class="o">(</span><span class="n">minCapacity</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">ensureCapacityInternal</span><span class="o">(</span><span class="kt">int</span> <span class="n">minCapacity</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">elementData</span> <span class="o">==</span> <span class="n">EMPTY_ELEMENTDATA</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">minCapacity</span> <span class="o">=</span> <span class="n">Math</span><span class="o">.</span><span class="na">max</span><span class="o">(</span><span class="n">DEFAULT_CAPACITY</span><span class="o">,</span> <span class="n">minCapacity</span><span class="o">);</span>
+        <span class="o">}</span>
+
+        <span class="n">ensureExplicitCapacity</span><span class="o">(</span><span class="n">minCapacity</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">ensureExplicitCapacity</span><span class="o">(</span><span class="kt">int</span> <span class="n">minCapacity</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">modCount</span><span class="o">++;</span>
+
+        <span class="c1">// overflow-conscious code</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">minCapacity</span> <span class="o">-</span> <span class="n">elementData</span><span class="o">.</span><span class="na">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span>
+            <span class="n">grow</span><span class="o">(</span><span class="n">minCapacity</span><span class="o">);</span>
+    <span class="o">}</span>
+</pre></div>
+
+
+<p>你阅读代码后发现，居然都是容量是否足够上的逻辑判断，容量不够的情况最后走到的是<code>grow()</code>方法。</p>
+<p>数组容量增长：</p>
+<div class="highlight"><pre><span></span><span class="kd">private</span> <span class="kt">void</span> <span class="nf">grow</span><span class="o">(</span><span class="kt">int</span> <span class="n">minCapacity</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">// overflow-conscious code</span>
+        <span class="kt">int</span> <span class="n">oldCapacity</span> <span class="o">=</span> <span class="n">elementData</span><span class="o">.</span><span class="na">length</span><span class="o">;</span>
+        <span class="kt">int</span> <span class="n">newCapacity</span> <span class="o">=</span> <span class="n">oldCapacity</span> <span class="o">+</span> <span class="o">(</span><span class="n">oldCapacity</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="o">);</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">newCapacity</span> <span class="o">-</span> <span class="n">minCapacity</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span>
+            <span class="n">newCapacity</span> <span class="o">=</span> <span class="n">minCapacity</span><span class="o">;</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">newCapacity</span> <span class="o">-</span> <span class="n">MAX_ARRAY_SIZE</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span>
+            <span class="n">newCapacity</span> <span class="o">=</span> <span class="n">hugeCapacity</span><span class="o">(</span><span class="n">minCapacity</span><span class="o">);</span>
+        <span class="c1">// minCapacity is usually close to size, so this is a win:</span>
+        <span class="n">elementData</span> <span class="o">=</span> <span class="n">Arrays</span><span class="o">.</span><span class="na">copyOf</span><span class="o">(</span><span class="n">elementData</span><span class="o">,</span> <span class="n">newCapacity</span><span class="o">);</span>
+<span class="o">}</span>
+</pre></div>
+
+
+<p>这里主要介绍下<code>Arrays.copyOf</code>方法，跟踪Arrays.copyOf代码可以看到核心还是<code>System.arraycopy</code>方法。</p>
+<h6>System.arraycopy：</h6>
+<div class="highlight"><pre><span></span><span class="cm">/*</span>
+<span class="cm"> * @param      src      源数组</span>
+<span class="cm"> * @param      srcPos   源数组复制的起始位置</span>
+<span class="cm"> * @param      dest     目的数组</span>
+<span class="cm"> * @param      destPos  目的数组放置的起始位置</span>
+<span class="cm"> * @param      length   复制的长度</span>
+<span class="cm"> */</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="kd">native</span> <span class="kt">void</span> <span class="nf">arraycopy</span><span class="o">(</span><span class="n">Object</span> <span class="n">src</span><span class="o">,</span>  <span class="kt">int</span>  <span class="n">srcPos</span><span class="o">,</span>
+                                        <span class="n">Object</span> <span class="n">dest</span><span class="o">,</span> <span class="kt">int</span> <span class="n">destPos</span><span class="o">,</span>
+                                        <span class="kt">int</span> <span class="n">length</span><span class="o">);</span>
+</pre></div>
+
+
+<p>该方法是native的，不对底层的源码进行研究，知道方法用法和产生的结果就OK了。根据参数的解释很好理解可以达到的效果，有兴趣的朋友可以直接调这个函数进行试验。</p>
+<h5>小结</h5>
+<p>ArrayList实例都有一个容量，它总是至少等于列表的大小。随着向ArrayList中不断添加元素，其容量也自动增长。自动增长会带来数据向新数组的重新拷贝<code>Arrays.copyOf(elementData, newCapacity)</code>，因此，如果可预知数据量的多少，可在构造ArrayList时指定其容量。在添加大量元素前，应用程序也可以使用ensureCapacity操作来增加ArrayList实例的容量，这可以减少递增式再分配的数量。 </p>
+<h4>LinkedList</h4>
+<ul>
+<li>LinkedList 是一个继承于AbstractSequentialList的双向链表。它也可以被当作堆栈、队列或双端队列进行操作。</li>
+<li>LinkedList 实现 List 接口，能对它进行队列操作。</li>
+<li>LinkedList 实现 Deque 接口，即能将LinkedList当作双端队列使用。</li>
+</ul>
+<p>数据结构：</p>
+<p><img alt="双向链表" src="https://github.com/tuyc/tuyc.github.io/blob/master/images/WX20170719-003336@2x.png?raw=true" /></p>
+<p>链表存储结构具有两个基本特点：</p>
+<ul>
+<li>链表是一种物理存储单元上非连续、非顺序的存储结构。</li>
+<li>数据元素的逻辑顺序是通过链表中的指针链接次序实现的。</li>
+</ul>
+<h5>源码</h5>
+<p>构造函数：</p>
+<div class="highlight"><pre><span></span>    <span class="kd">public</span> <span class="nf">LinkedList</span><span class="o">()</span> <span class="o">{</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nf">LinkedList</span><span class="o">(</span><span class="n">Collection</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">E</span><span class="o">&gt;</span> <span class="n">c</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">();</span>
+        <span class="n">addAll</span><span class="o">(</span><span class="n">c</span><span class="o">);</span>
+    <span class="o">}</span>
+</pre></div>
+
+
+<p>LinkedList的构造函数有两个：一种是默认构造和一种是给初始集合数据。使用有参构造函数会把Collection数据依次取出放到链表的尾部。这里先来看一下构造函数中使用到的<code>addAll()</code>方法：</p>
+<div class="highlight"><pre><span></span>    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">addAll</span><span class="o">(</span><span class="n">Collection</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">E</span><span class="o">&gt;</span> <span class="n">c</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">addAll</span><span class="o">(</span><span class="n">size</span><span class="o">,</span> <span class="n">c</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">addAll</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">,</span> <span class="n">Collection</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">E</span><span class="o">&gt;</span> <span class="n">c</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">checkPositionIndex</span><span class="o">(</span><span class="n">index</span><span class="o">);</span>
+
+        <span class="n">Object</span><span class="o">[]</span> <span class="n">a</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="na">toArray</span><span class="o">();</span>
+        <span class="kt">int</span> <span class="n">numNew</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="na">length</span><span class="o">;</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">numNew</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span>
+            <span class="k">return</span> <span class="kc">false</span><span class="o">;</span>
+
+        <span class="n">Node</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">pred</span><span class="o">,</span> <span class="n">succ</span><span class="o">;</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">index</span> <span class="o">==</span> <span class="n">size</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">succ</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="n">last</span><span class="o">;</span>
+        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+            <span class="n">succ</span> <span class="o">=</span> <span class="n">node</span><span class="o">(</span><span class="n">index</span><span class="o">);</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="n">succ</span><span class="o">.</span><span class="na">prev</span><span class="o">;</span>
+        <span class="o">}</span>
+
+        <span class="k">for</span> <span class="o">(</span><span class="n">Object</span> <span class="n">o</span> <span class="o">:</span> <span class="n">a</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nd">@SuppressWarnings</span><span class="o">(</span><span class="s">&quot;unchecked&quot;</span><span class="o">)</span> <span class="n">E</span> <span class="n">e</span> <span class="o">=</span> <span class="o">(</span><span class="n">E</span><span class="o">)</span> <span class="n">o</span><span class="o">;</span>
+            <span class="n">Node</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">newNode</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Node</span><span class="o">&lt;&gt;(</span><span class="n">pred</span><span class="o">,</span> <span class="n">e</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">pred</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span>
+                <span class="n">first</span> <span class="o">=</span> <span class="n">newNode</span><span class="o">;</span>
+            <span class="k">else</span>
+                <span class="n">pred</span><span class="o">.</span><span class="na">next</span> <span class="o">=</span> <span class="n">newNode</span><span class="o">;</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="n">newNode</span><span class="o">;</span>
+        <span class="o">}</span>
+
+        <span class="k">if</span> <span class="o">(</span><span class="n">succ</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">last</span> <span class="o">=</span> <span class="n">pred</span><span class="o">;</span>
+        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+            <span class="n">pred</span><span class="o">.</span><span class="na">next</span> <span class="o">=</span> <span class="n">succ</span><span class="o">;</span>
+            <span class="n">succ</span><span class="o">.</span><span class="na">prev</span> <span class="o">=</span> <span class="n">pred</span><span class="o">;</span>
+        <span class="o">}</span>
+
+        <span class="n">size</span> <span class="o">+=</span> <span class="n">numNew</span><span class="o">;</span>
+        <span class="n">modCount</span><span class="o">++;</span>
+        <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+    <span class="o">}</span>
+</pre></div>
+
+
+<p>这个方法的功能就是将Collection集合的全部数据拿出来放到index索引开始的链表上，可能是表头、表中、表尾，根据index参数决定。</p>
+<p>下面来Look下add、remove、set、get，以及队列和栈常用方法源码：</p>
+<div class="highlight"><pre><span></span><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">add</span><span class="o">(</span><span class="n">E</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">linkLast</span><span class="o">(</span><span class="n">e</span><span class="o">);</span>
+        <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+<span class="o">}</span>
+
+<span class="kt">void</span> <span class="nf">linkLast</span><span class="o">(</span><span class="n">E</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kd">final</span> <span class="n">Node</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">l</span> <span class="o">=</span> <span class="n">last</span><span class="o">;</span>
+        <span class="kd">final</span> <span class="n">Node</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">newNode</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Node</span><span class="o">&lt;&gt;(</span><span class="n">l</span><span class="o">,</span> <span class="n">e</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
+        <span class="n">last</span> <span class="o">=</span> <span class="n">newNode</span><span class="o">;</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">l</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span>
+            <span class="n">first</span> <span class="o">=</span> <span class="n">newNode</span><span class="o">;</span>
+        <span class="k">else</span>
+            <span class="n">l</span><span class="o">.</span><span class="na">next</span> <span class="o">=</span> <span class="n">newNode</span><span class="o">;</span>
+        <span class="n">size</span><span class="o">++;</span>
+        <span class="n">modCount</span><span class="o">++;</span>
+<span class="o">}</span> 
+
+<span class="kd">public</span> <span class="n">E</span> <span class="nf">remove</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">checkElementIndex</span><span class="o">(</span><span class="n">index</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">unlink</span><span class="o">(</span><span class="n">node</span><span class="o">(</span><span class="n">index</span><span class="o">));</span>
+<span class="o">}</span>
+
+ <span class="kd">public</span> <span class="n">E</span> <span class="nf">set</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">,</span> <span class="n">E</span> <span class="n">element</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">checkElementIndex</span><span class="o">(</span><span class="n">index</span><span class="o">);</span>
+        <span class="n">Node</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">node</span><span class="o">(</span><span class="n">index</span><span class="o">);</span>
+        <span class="n">E</span> <span class="n">oldVal</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="na">item</span><span class="o">;</span>
+        <span class="n">x</span><span class="o">.</span><span class="na">item</span> <span class="o">=</span> <span class="n">element</span><span class="o">;</span>
+        <span class="k">return</span> <span class="n">oldVal</span><span class="o">;</span>
+ <span class="o">}</span>
+
+ <span class="kd">public</span> <span class="n">E</span> <span class="nf">get</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">checkElementIndex</span><span class="o">(</span><span class="n">index</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">node</span><span class="o">(</span><span class="n">index</span><span class="o">).</span><span class="na">item</span><span class="o">;</span>
+ <span class="o">}</span>
+
+ <span class="cm">/*******************队列*****************/</span>
+ <span class="kd">public</span> <span class="n">E</span> <span class="nf">poll</span><span class="o">()</span> <span class="o">{</span>
+        <span class="kd">final</span> <span class="n">Node</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">f</span> <span class="o">=</span> <span class="n">first</span><span class="o">;</span>
+        <span class="k">return</span> <span class="o">(</span><span class="n">f</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">?</span> <span class="kc">null</span> <span class="o">:</span> <span class="n">unlinkFirst</span><span class="o">(</span><span class="n">f</span><span class="o">);</span>
+  <span class="o">}</span>
+
+  <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">offer</span><span class="o">(</span><span class="n">E</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">add</span><span class="o">(</span><span class="n">e</span><span class="o">);</span>
+  <span class="o">}</span>
+
+<span class="cm">/****************栈******************/</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">push</span><span class="o">(</span><span class="n">E</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">addFirst</span><span class="o">(</span><span class="n">e</span><span class="o">);</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="n">E</span> <span class="nf">pop</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="n">removeFirst</span><span class="o">();</span>
+<span class="o">}</span>
+</pre></div>
+
+
+<p>LinkedList的数据操作都是简单的链表操作，前提是熟悉链表操作，想当初的C语言学习链表时也是经历了懵懂的代价，成熟了就好。</p>
+<p>add方法会把元素加到表尾而不是表头；LinkedList可以当做栈和队列使用是因为实现了Deque接口，有队列poll、offer方法和栈push、pop方法，数据结构是基于链表来实现的；</p>
+<h5>小结</h5>
+<p>相比ArrayList而言，LinkedList数据的增加，删除，不会有增容和数组拷贝，效率更高效。对于查询和修改，LinkedList需要根据指针依次检查，ArrayList是随存随取，ArrayList会更高效。有一点需要注意，很多时候都会谈到性能问题，但是对于数据量小的情况影响真的不大，哪一种数据结构方便就使用哪种就好了，不用去纠结和比较。</p>
+<h4>HashMap</h4>
+<ul>
+<li>HashMap 是一个采用哈希表（数组+链表）实现的键值对集合，继承自 AbstractMap，实现了 Map 接口 。 </li>
+<li>两个关键因子：初始容量、加载因子</li>
+<li>插入、获取的时间复杂度基本是 O(1)</li>
+</ul>
+<p>数据结构：</p>
+<p><img alt="img" src="https://github.com/tuyc/tuyc.github.io/blob/master/images/WX20170719-001915@2x.png?raw=true" /></p>
+<h5>源码</h5>
+<p>构造函数：</p>
+<div class="highlight"><pre><span></span><span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">DEFAULT_INITIAL_CAPACITY</span> <span class="o">=</span> <span class="mi">4</span><span class="o">;</span> 
+<span class="kd">static</span> <span class="kd">final</span> <span class="kt">float</span> <span class="n">DEFAULT_LOAD_FACTOR</span> <span class="o">=</span> <span class="mf">0.75f</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="nf">HashMap</span><span class="o">(</span><span class="kt">int</span> <span class="n">initialCapacity</span><span class="o">,</span> <span class="kt">float</span> <span class="n">loadFactor</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">initialCapacity</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">IllegalArgumentException</span><span class="o">(</span><span class="s">&quot;Illegal initial capacity: &quot;</span> <span class="o">+</span> <span class="n">initialCapacity</span><span class="o">);</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">initialCapacity</span> <span class="o">&gt;</span> <span class="n">MAXIMUM_CAPACITY</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">initialCapacity</span> <span class="o">=</span> <span class="n">MAXIMUM_CAPACITY</span><span class="o">;</span>
+        <span class="o">}</span> <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">initialCapacity</span> <span class="o">&lt;</span> <span class="n">DEFAULT_INITIAL_CAPACITY</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">initialCapacity</span> <span class="o">=</span> <span class="n">DEFAULT_INITIAL_CAPACITY</span><span class="o">;</span>
+        <span class="o">}</span>
+
+        <span class="k">if</span> <span class="o">(</span><span class="n">loadFactor</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="o">||</span> <span class="n">Float</span><span class="o">.</span><span class="na">isNaN</span><span class="o">(</span><span class="n">loadFactor</span><span class="o">))</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">IllegalArgumentException</span><span class="o">(</span><span class="s">&quot;Illegal load factor: &quot;</span> <span class="o">+</span> <span class="n">loadFactor</span><span class="o">);</span>
+        <span class="n">threshold</span> <span class="o">=</span> <span class="n">initialCapacity</span><span class="o">;</span>
+        <span class="n">init</span><span class="o">();</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nf">HashMap</span><span class="o">(</span><span class="kt">int</span> <span class="n">initialCapacity</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">(</span><span class="n">initialCapacity</span><span class="o">,</span> <span class="n">DEFAULT_LOAD_FACTOR</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nf">HashMap</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">(</span><span class="n">DEFAULT_INITIAL_CAPACITY</span><span class="o">,</span> <span class="n">DEFAULT_LOAD_FACTOR</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nf">HashMap</span><span class="o">(</span><span class="n">Map</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">K</span><span class="o">,</span> <span class="o">?</span> <span class="kd">extends</span> <span class="n">V</span><span class="o">&gt;</span> <span class="n">m</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">(</span><span class="n">Math</span><span class="o">.</span><span class="na">max</span><span class="o">((</span><span class="kt">int</span><span class="o">)</span> <span class="o">(</span><span class="n">m</span><span class="o">.</span><span class="na">size</span><span class="o">()</span> <span class="o">/</span> <span class="n">DEFAULT_LOAD_FACTOR</span><span class="o">)</span> <span class="o">+</span> <span class="mi">1</span><span class="o">,</span>
+                      <span class="n">DEFAULT_INITIAL_CAPACITY</span><span class="o">),</span> <span class="n">DEFAULT_LOAD_FACTOR</span><span class="o">);</span>
+        <span class="n">inflateTable</span><span class="o">(</span><span class="n">threshold</span><span class="o">);</span>
+        <span class="n">putAllForCreate</span><span class="o">(</span><span class="n">m</span><span class="o">);</span>
+    <span class="o">}</span>
+</pre></div>
+
+
+<p>HashMap的构造函数有四个，而最终都会执行<code>HashMap(int initialCapacity, float loadFactor)</code>构造函数，无论是默认构造、初始容量构造，还是初始集合构造。主要有2点：</p>
+<ul>
+<li>DEFAULT_INITIAL_CAPACITY默认初始容量，DEFAULT_LOAD_FACTOR装载因子，这是个经验值。</li>
+<li>可以指定初始容量，以及装载因子。一般情况都会使用默认的装载因子。</li>
+</ul>
+<p>下面来Look下put（新增和修改）、remove、get源码：</p>
+<div class="highlight"><pre><span></span><span class="kd">public</span> <span class="n">V</span> <span class="nf">put</span><span class="o">(</span><span class="n">K</span> <span class="n">key</span><span class="o">,</span> <span class="n">V</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">table</span> <span class="o">==</span> <span class="n">EMPTY_TABLE</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">inflateTable</span><span class="o">(</span><span class="n">threshold</span><span class="o">);</span>
+    <span class="o">}</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">key</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span>
+        <span class="k">return</span> <span class="n">putForNullKey</span><span class="o">(</span><span class="n">value</span><span class="o">);</span>
+    <span class="kt">int</span> <span class="n">hash</span> <span class="o">=</span> <span class="n">sun</span><span class="o">.</span><span class="na">misc</span><span class="o">.</span><span class="na">Hashing</span><span class="o">.</span><span class="na">singleWordWangJenkinsHash</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
+    <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">indexFor</span><span class="o">(</span><span class="n">hash</span><span class="o">,</span> <span class="n">table</span><span class="o">.</span><span class="na">length</span><span class="o">);</span>
+    <span class="k">for</span> <span class="o">(</span><span class="n">HashMapEntry</span><span class="o">&lt;</span><span class="n">K</span><span class="o">,</span><span class="n">V</span><span class="o">&gt;</span> <span class="n">e</span> <span class="o">=</span> <span class="n">table</span><span class="o">[</span><span class="n">i</span><span class="o">];</span> <span class="n">e</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">;</span> <span class="n">e</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="na">next</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">Object</span> <span class="n">k</span><span class="o">;</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">e</span><span class="o">.</span><span class="na">hash</span> <span class="o">==</span> <span class="n">hash</span> <span class="o">&amp;&amp;</span> <span class="o">((</span><span class="n">k</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="na">key</span><span class="o">)</span> <span class="o">==</span> <span class="n">key</span> <span class="o">||</span> <span class="n">key</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">k</span><span class="o">)))</span> <span class="o">{</span>
+            <span class="n">V</span> <span class="n">oldValue</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="na">value</span><span class="o">;</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">;</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">recordAccess</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+            <span class="k">return</span> <span class="n">oldValue</span><span class="o">;</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="n">modCount</span><span class="o">++;</span>
+    <span class="n">addEntry</span><span class="o">(</span><span class="n">hash</span><span class="o">,</span> <span class="n">key</span><span class="o">,</span> <span class="n">value</span><span class="o">,</span> <span class="n">i</span><span class="o">);</span>
+    <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+<span class="o">}</span>
+
+<span class="kd">static</span> <span class="kt">int</span> <span class="nf">indexFor</span><span class="o">(</span><span class="kt">int</span> <span class="n">h</span><span class="o">,</span> <span class="kt">int</span> <span class="n">length</span><span class="o">)</span> <span class="o">{</span>
+       <span class="k">return</span> <span class="n">h</span> <span class="o">&amp;</span> <span class="o">(</span><span class="n">length</span><span class="o">-</span><span class="mi">1</span><span class="o">);</span>
+<span class="o">}</span>
+
+<span class="kt">void</span> <span class="nf">addEntry</span><span class="o">(</span><span class="kt">int</span> <span class="n">hash</span><span class="o">,</span> <span class="n">K</span> <span class="n">key</span><span class="o">,</span> <span class="n">V</span> <span class="n">value</span><span class="o">,</span> <span class="kt">int</span> <span class="n">bucketIndex</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">((</span><span class="n">size</span> <span class="o">&gt;=</span> <span class="n">threshold</span><span class="o">)</span> <span class="o">&amp;&amp;</span> <span class="o">(</span><span class="kc">null</span> <span class="o">!=</span> <span class="n">table</span><span class="o">[</span><span class="n">bucketIndex</span><span class="o">]))</span> <span class="o">{</span>
+            <span class="n">resize</span><span class="o">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">table</span><span class="o">.</span><span class="na">length</span><span class="o">);</span>
+            <span class="n">hash</span> <span class="o">=</span> <span class="o">(</span><span class="kc">null</span> <span class="o">!=</span> <span class="n">key</span><span class="o">)</span> <span class="o">?</span> <span class="n">sun</span><span class="o">.</span><span class="na">misc</span><span class="o">.</span><span class="na">Hashing</span><span class="o">.</span><span class="na">singleWordWangJenkinsHash</span><span class="o">(</span><span class="n">key</span><span class="o">)</span> <span class="o">:</span> <span class="mi">0</span><span class="o">;</span>
+            <span class="n">bucketIndex</span> <span class="o">=</span> <span class="n">indexFor</span><span class="o">(</span><span class="n">hash</span><span class="o">,</span> <span class="n">table</span><span class="o">.</span><span class="na">length</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="n">createEntry</span><span class="o">(</span><span class="n">hash</span><span class="o">,</span> <span class="n">key</span><span class="o">,</span> <span class="n">value</span><span class="o">,</span> <span class="n">bucketIndex</span><span class="o">);</span>
+    <span class="o">}</span>
+
+<span class="kt">void</span> <span class="nf">createEntry</span><span class="o">(</span><span class="kt">int</span> <span class="n">hash</span><span class="o">,</span> <span class="n">K</span> <span class="n">key</span><span class="o">,</span> <span class="n">V</span> <span class="n">value</span><span class="o">,</span> <span class="kt">int</span> <span class="n">bucketIndex</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">HashMapEntry</span><span class="o">&lt;</span><span class="n">K</span><span class="o">,</span><span class="n">V</span><span class="o">&gt;</span> <span class="n">e</span> <span class="o">=</span> <span class="n">table</span><span class="o">[</span><span class="n">bucketIndex</span><span class="o">];</span>
+        <span class="n">table</span><span class="o">[</span><span class="n">bucketIndex</span><span class="o">]</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMapEntry</span><span class="o">&lt;&gt;(</span><span class="n">hash</span><span class="o">,</span> <span class="n">key</span><span class="o">,</span> <span class="n">value</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+        <span class="n">size</span><span class="o">++;</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="n">V</span> <span class="nf">remove</span><span class="o">(</span><span class="n">Object</span> <span class="n">key</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">Entry</span><span class="o">&lt;</span><span class="n">K</span><span class="o">,</span><span class="n">V</span><span class="o">&gt;</span> <span class="n">e</span> <span class="o">=</span> <span class="n">removeEntryForKey</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
+        <span class="k">return</span> <span class="o">(</span><span class="n">e</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">?</span> <span class="kc">null</span> <span class="o">:</span> <span class="n">e</span><span class="o">.</span><span class="na">getValue</span><span class="o">());</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="n">V</span> <span class="nf">get</span><span class="o">(</span><span class="n">Object</span> <span class="n">key</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">key</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span>
+            <span class="k">return</span> <span class="n">getForNullKey</span><span class="o">();</span>
+        <span class="n">Entry</span><span class="o">&lt;</span><span class="n">K</span><span class="o">,</span><span class="n">V</span><span class="o">&gt;</span> <span class="n">entry</span> <span class="o">=</span> <span class="n">getEntry</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
+
+        <span class="k">return</span> <span class="kc">null</span> <span class="o">==</span> <span class="n">entry</span> <span class="o">?</span> <span class="kc">null</span> <span class="o">:</span> <span class="n">entry</span><span class="o">.</span><span class="na">getValue</span><span class="o">();</span>
+<span class="o">}</span>
+</pre></div>
+
+
+<ul>
+<li>put函数</li>
+</ul>
+<p><code>java
+  if (key == null)
+          return putForNullKey(value);</code></p>
+<p>由此可知key可以为空。</p>
+<p><code>java
+  int hash = sun.misc.Hashing.singleWordWangJenkinsHash(key);
+  int i = indexFor(hash, table.length);</code></p>
+<p>hash的的算法不用care，只要理解根据key得到hash值即可；再根据hash值，<code>indexFor(int h, int length)</code>计算桶（数组）的下标；这一步任务就是定位桶的下标。</p>
+<p><code>java
+  for (HashMapEntry&lt;K,V&gt; e = table[i]; e != null; e = e.next) {
+          Object k;
+          if (e.hash == hash &amp;&amp; ((k = e.key) == key || key.equals(k))) {
+              V oldValue = e.value;
+              e.value = value;
+              e.recordAccess(this);
+              return oldValue;
+          }
+      }</code></p>
+<p>这里可以发现for循环初始值HashMapEntry<K,V> e=table[i]（i是上一步计算出的下标），HashMapEntry是一个链表结点，并拥有next结点；滑动链表结点，依次比较，当<code>e.hash == hash &amp;&amp; ((k = e.key) == key || key.equals(k))</code>条件满足就找到了相同的key，进行修改操作，否则就进行增加操作，如下：</p>
+<p><code>java
+  addEntry(hash, key, value, i);</code></p>
+<p>最后会执行到：</p>
+<p><code>java
+  void createEntry(int hash, K key, V value, int bucketIndex) {
+          HashMapEntry&lt;K,V&gt; e = table[bucketIndex];
+          table[bucketIndex] = new HashMapEntry&lt;&gt;(hash, key, value, e);
+          size++;
+  }</code></p>
+<p>由代码可以发现，新增的元素都是放在对应桶的链表的表头。由此可以得出不发生hash碰撞情况，插入操作的时间复杂度是O(1)的。</p>
+<ul>
+<li>remove函数</li>
+</ul>
+<p>```java
+  final Entry<K,V> removeEntryForKey(Object key) {
+          if (size == 0) {
+              return null;
+          }
+          int hash = (key == null) ? 0 : sun.misc.Hashing.singleWordWangJenkinsHash(key);
+          int i = indexFor(hash, table.length);
+          HashMapEntry<K,V> prev = table[i];
+          HashMapEntry<K,V> e = prev;</p>
+<div class="highlight"><pre><span></span>      while (e != null) {
+          HashMapEntry&lt;K,V&gt; next = e.next;
+          Object k;
+          if (e.hash == hash &amp;&amp;
+              ((k = e.key) == key || (key != null &amp;&amp; key.equals(k)))) {
+              modCount++;
+              size--;
+              if (prev == e)
+                  table[i] = next;
+              else
+                  prev.next = next;
+              e.recordRemoval(this);
+              return e;
+          }
+          prev = e;
+          e = next;
+      }
+
+      return e;
+  }
+</pre></div>
+
+
+<p>```</p>
+<p>可以发现主要的过程也是由key得到hash值，再定位桶的下标，继续遍历链表，寻找与之对应的key，之后都是链表操作就不再描述了。</p>
+<ul>
+<li>get函数</li>
+</ul>
+<p>核心函数是：</p>
+<p>```java
+  final Entry<K,V> getEntry(Object key) {
+          if (size == 0) {
+              return null;
+          }</p>
+<div class="highlight"><pre><span></span>      int hash = (key == null) ? 0 : sun.misc.Hashing.singleWordWangJenkinsHash(key);
+      for (HashMapEntry&lt;K,V&gt; e = table[indexFor(hash, table.length)];
+           e != null;
+           e = e.next) {
+          Object k;
+          if (e.hash == hash &amp;&amp;
+              ((k = e.key) == key || (key != null &amp;&amp; key.equals(k))))
+              return e;
+      }
+      return null;
+  }
+</pre></div>
+
+
+<p>```</p>
+<p>你会发现主要的过程还是根据key得到hash值，根据hash值定位桶的下标，继续遍历链表，寻找与之对应的key，找到了就返回对应的value。由此可以得出：在不发生hash碰撞的情况下，查找的时间复杂度为O(1)。因为不发生Hash碰撞，所要找的元素就是对应桶里的唯一元素，而桶的下标是根据key的hash值计算直接得到的。</p>
+<h5>小结</h5>
+<p>数组存储的特点：区间是连续的，占用内存严重，故空间复杂的很大。寻址容易，插入和删除困难。</p>
+<p>链表存储特点：区间离散，占用内存比较宽松，故空间复杂度很小，但时间复杂度很大，达O（N）。寻址困难，插入和删除容易。</p>
+<p>哈希表就是结合了两者特性，做出一种寻址容易，插入删除也容易的数据结构。</p></div>
+        <hr />
+    </div>
+		
+
+ 
+        
+
+ 
+
+    <div class='article'>
+        <a href="/android-animation/yeyu_animation_vo_high.html"><h2>Android ValueAnimator和ObjectAnimator高级用法</h2></a>
+        <div class= "well small"> 六 10 十二月 2016
+
+by <a class="url fn" href="/author/tuyc.html">tuyc</a>
+ 
+
+
+ </div>
+        <div class="summary"><h3>ValueAnimator高级用法</h3>
 <p>​       先了解TypeEvaluator用法：</p>
 <p>​      TypeEvaluator的作用是什么？其实，就是告诉动画系统如何从初始值到结束值。比如ValueAnimator.ofFloat()，系统默认有一个FloatEvaluator，实现了初始到结束值之间的平滑过渡。FloatEvaluator源码如下：</p>
 <div class="highlight"><pre><span></span><span class="kd">public</span> <span class="kd">class</span> <span class="nc">FloatEvaluator</span> <span class="kd">implements</span> <span class="n">TypeEvaluator</span> <span class="o">{</span>
@@ -84,229 +590,9 @@ by <a class="url fn" href="/author/tuyc.html">tuyc</a>
 <p>我们可以实现一个自己的TypeEvaluator，for example：</p>
 <div class="highlight"><pre><span></span><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Love</span> <span class="o">{</span>
     <span class="kd">public</span> <span class="kt">float</span> <span class="n">degree</span><span class="o">;</span>
-    <span class="kd">public</span> <span class="nf">Love</span><span class="o">(</span><span class="kt">float</span> <span class="n">degree</span><span class="o">)</span> <span class="o">{</span>
-      <span class="k">this</span><span class="o">.</span><span class="na">degree</span> <span class="o">=</span> <span class="n">degree</span><span class="o">;</span>
-    <span class="o">}</span>
-<span class="o">}</span>
-
-<span class="kd">public</span> <span class="kd">class</span> <span class="nc">LoveEvaluator</span> <span class="kd">implements</span> <span class="n">TypeEvaluator</span><span class="o">{</span>
-
-    <span class="nd">@Override</span>
-    <span class="kd">public</span> <span class="n">Object</span> <span class="nf">evaluate</span><span class="o">(</span><span class="kt">float</span> <span class="n">fraction</span><span class="o">,</span> <span class="n">Object</span> <span class="n">startValue</span><span class="o">,</span> <span class="n">Object</span> <span class="n">endValue</span><span class="o">)</span> <span class="o">{</span>
-        <span class="n">Love</span> <span class="n">startLove</span> <span class="o">=</span> <span class="o">(</span><span class="n">Love</span><span class="o">)</span> <span class="n">startValue</span><span class="o">;</span>
-        <span class="n">Love</span> <span class="n">endLove</span> <span class="o">=</span> <span class="o">(</span><span class="n">Love</span><span class="o">)</span> <span class="n">endValue</span><span class="o">;</span>
-        <span class="n">Love</span> <span class="n">nowLove</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Love</span><span class="o">((</span><span class="n">startLove</span><span class="o">.</span><span class="na">degree</span> <span class="o">+</span> <span class="n">endLove</span><span class="o">.</span><span class="na">degree</span><span class="o">)</span> <span class="o">/</span> <span class="mi">2</span><span class="o">)</span> <span class="o">;</span>
-        <span class="k">return</span> <span class="n">nowLove</span><span class="o">;</span>
-    <span class="o">}</span>
-<span class="o">}</span>
-
-<span class="c1">// 动画中使用</span>
-<span class="n">Love</span> <span class="n">loveStart</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Love</span><span class="o">(</span><span class="mi">100</span><span class="n">f</span><span class="o">);</span>
-<span class="n">Love</span> <span class="n">loveEnd</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Love</span><span class="o">(</span><span class="mi">100</span><span class="n">f</span><span class="o">);</span>
-<span class="n">ValueAnimator</span> <span class="n">anim</span> <span class="o">=</span> <span class="n">ValueAnimator</span><span class="o">.</span><span class="na">ofObject</span><span class="o">(</span><span class="k">new</span> <span class="n">LoveEvaluator</span><span class="o">(),</span> <span class="n">loveStart</span><span class="o">,</span> <span class="n">loveEnd</span><span class="o">);</span>
-<span class="n">anim</span><span class="o">.</span><span class="na">addUpdateListener</span><span class="o">(</span><span class="k">new</span> <span class="n">ValueAnimator</span><span class="o">.</span><span class="na">AnimatorUpdateListener</span><span class="o">()</span> <span class="o">{</span>
-            <span class="nd">@Override</span>
-            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onAnimationUpdate</span><span class="o">(</span><span class="n">ValueAnimator</span> <span class="n">animation</span><span class="o">)</span> <span class="o">{</span>
-                <span class="n">Love</span> <span class="n">love</span> <span class="o">=</span> <span class="o">(</span><span class="n">Love</span><span class="o">)</span> <span class="n">animation</span><span class="o">.</span><span class="na">getAnimatedValue</span><span class="o">();</span>
-                <span class="c1">// do something</span>
-            <span class="o">}</span>
-        <span class="o">});</span>
-<span class="n">anim</span><span class="o">.</span><span class="na">setDuration</span><span class="o">(</span><span class="mi">5000</span><span class="o">);</span>
-<span class="n">anim</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
-</pre></div>
-
-
-<hr />
-<h3>ObjectAnimator的高级用法</h3>
-<div class="highlight"><pre><span></span><span class="cm">/***颜色渐变的TypeEvaluator（来自网上，非原创  觉得挺有意思的，在此共鸣）*****/</span>
-<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ColorEvaluator</span> <span class="kd">implements</span> <span class="n">TypeEvaluator</span> <span class="o">{</span>
-        <span class="kd">private</span> <span class="kt">int</span> <span class="n">mCurrentRed</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
-        <span class="kd">private</span> <span class="kt">int</span> <span class="n">mCurrentGreen</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
-        <span class="kd">private</span> <span class="kt">int</span> <span class="n">mCurrentBlue</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
-
-        <span class="nd">@Override</span>
-        <span class="kd">public</span> <span class="n">Object</span> <span class="nf">evaluate</span><span class="o">(</span><span class="kt">float</span> <span class="n">fraction</span><span class="o">,</span> <span class="n">Object</span> <span class="n">startValue</span><span class="o">,</span> <span class="n">Object</span> <span class="n">endValue</span><span class="o">)</span> <span class="o">{</span>
-            <span class="n">String</span> <span class="n">startColor</span> <span class="o">=</span> <span class="o">(</span><span class="n">String</span><span class="o">)</span> <span class="n">startValue</span><span class="o">;</span>
-            <span class="n">String</span> <span class="n">endColor</span> <span class="o">=</span> <span class="o">(</span><span class="n">String</span><span class="o">)</span> <span class="n">endValue</span><span class="o">;</span>
-            <span class="kt">int</span> <span class="n">startRed</span> <span class="o">=</span> <span class="n">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="n">startColor</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">3</span><span class="o">),</span> <span class="mi">16</span><span class="o">);</span>
-            <span class="kt">int</span> <span class="n">startGreen</span> <span class="o">=</span> <span class="n">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="n">startColor</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="mi">3</span><span class="o">,</span> <span class="mi">5</span><span class="o">),</span> <span class="mi">16</span><span class="o">);</span>
-            <span class="kt">int</span> <span class="n">startBlue</span> <span class="o">=</span> <span class="n">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="n">startColor</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="mi">5</span><span class="o">,</span> <span class="mi">7</span><span class="o">),</span> <span class="mi">16</span><span class="o">);</span>
-            <span class="kt">int</span> <span class="n">endRed</span> <span class="o">=</span> <span class="n">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="n">endColor</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">3</span><span class="o">),</span> <span class="mi">16</span><span class="o">);</span>
-            <span class="kt">int</span> <span class="n">endGreen</span> <span class="o">=</span> <span class="n">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="n">endColor</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="mi">3</span><span class="o">,</span> <span class="mi">5</span><span class="o">),</span> <span class="mi">16</span><span class="o">);</span>
-            <span class="kt">int</span> <span class="n">endBlue</span> <span class="o">=</span> <span class="n">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="n">endColor</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="mi">5</span><span class="o">,</span> <span class="mi">7</span><span class="o">),</span> <span class="mi">16</span><span class="o">);</span>
-            <span class="c1">// 初始化颜色的值</span>
-            <span class="k">if</span> <span class="o">(</span><span class="n">mCurrentRed</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
-                <span class="n">mCurrentRed</span> <span class="o">=</span> <span class="n">startRed</span><span class="o">;</span>
-            <span class="o">}</span>
-            <span class="k">if</span> <span class="o">(</span><span class="n">mCurrentGreen</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
-                <span class="n">mCurrentGreen</span> <span class="o">=</span> <span class="n">startGreen</span><span class="o">;</span>
-            <span class="o">}</span>
-            <span class="k">if</span> <span class="o">(</span><span class="n">mCurrentBlue</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
-                <span class="n">mCurrentBlue</span> <span class="o">=</span> <span class="n">startBlue</span><span class="o">;</span>
-            <span class="o">}</span>
-            <span class="c1">// 计算初始颜色和结束颜色之间的差值</span>
-            <span class="kt">int</span> <span class="n">redDiff</span> <span class="o">=</span> <span class="n">Math</span><span class="o">.</span><span class="na">abs</span><span class="o">(</span><span class="n">startRed</span> <span class="o">-</span> <span class="n">endRed</span><span class="o">);</span>
-            <span class="kt">int</span> <span class="n">greenDiff</span> <span class="o">=</span> <span class="n">Math</span><span class="o">.</span><span class="na">abs</span><span class="o">(</span><span class="n">startGreen</span> <span class="o">-</span> <span class="n">endGreen</span><span class="o">);</span>
-            <span class="kt">int</span> <span class="n">blueDiff</span> <span class="o">=</span> <span class="n">Math</span><span class="o">.</span><span class="na">abs</span><span class="o">(</span><span class="n">startBlue</span> <span class="o">-</span> <span class="n">endBlue</span><span class="o">);</span>
-            <span class="kt">int</span> <span class="n">colorDiff</span> <span class="o">=</span> <span class="n">redDiff</span> <span class="o">+</span> <span class="n">greenDiff</span> <span class="o">+</span> <span class="n">blueDiff</span><span class="o">;</span>
-            <span class="k">if</span> <span class="o">(</span><span class="n">mCurrentRed</span> <span class="o">!=</span> <span class="n">endRed</span><span class="o">)</span> <span class="o">{</span>
-                <span class="n">mCurrentRed</span> <span class="o">=</span> <span class="n">getCurrentColor</span><span class="o">(</span><span class="n">startRed</span><span class="o">,</span> <span class="n">endRed</span><span class="o">,</span> <span class="n">colorDiff</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span>
-                        <span class="n">fraction</span><span class="o">);</span>
-            <span class="o">}</span> <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">mCurrentGreen</span> <span class="o">!=</span> <span class="n">endGreen</span><span class="o">)</span> <span class="o">{</span>
-                <span class="n">mCurrentGreen</span> <span class="o">=</span> <span class="n">getCurrentColor</span><span class="o">(</span><span class="n">startGreen</span><span class="o">,</span> <span class="n">endGreen</span><span class="o">,</span> <span class="n">colorDiff</span><span class="o">,</span>
-                        <span class="n">redDiff</span><span class="o">,</span> <span class="n">fraction</span><span class="o">);</span>
-            <span class="o">}</span> <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">mCurrentBlue</span> <span class="o">!=</span> <span class="n">endBlue</span><span class="o">)</span> <span class="o">{</span>
-                <span class="n">mCurrentBlue</span> <span class="o">=</span> <span class="n">getCurrentColor</span><span class="o">(</span><span class="n">startBlue</span><span class="o">,</span> <span class="n">endBlue</span><span class="o">,</span> <span class="n">colorDiff</span><span class="o">,</span>
-                        <span class="n">redDiff</span> <span class="o">+</span> <span class="n">greenDiff</span><span class="o">,</span> <span class="n">fraction</span><span class="o">);</span>
-            <span class="o">}</span>
-            <span class="c1">// 将计算出的当前颜色的值组装返回</span>
-            <span class="n">String</span> <span class="n">currentColor</span> <span class="o">=</span> <span class="s">&quot;#&quot;</span> <span class="o">+</span> <span class="n">getHexString</span><span class="o">(</span><span class="n">mCurrentRed</span><span class="o">)</span>
-                    <span class="o">+</span> <span class="n">getHexString</span><span class="o">(</span><span class="n">mCurrentGreen</span><span class="o">)</span> <span class="o">+</span> <span class="n">getHexString</span><span class="o">(</span><span class="n">mCurrentBlue</span><span class="o">);</span>
-            <span class="k">return</span> <span class="n">currentColor</span><span class="o">;</span>
-        <span class="o">}</span>
-
-        <span class="cm">/**</span>
-<span class="cm">         * 根据fraction值来计算当前的颜色。</span>
-<span class="cm">         */</span>
-        <span class="kd">private</span> <span class="kt">int</span> <span class="nf">getCurrentColor</span><span class="o">(</span><span class="kt">int</span> <span class="n">startColor</span><span class="o">,</span> <span class="kt">int</span> <span class="n">endColor</span><span class="o">,</span> <span class="kt">int</span> <span class="n">colorDiff</span><span class="o">,</span>
-                                    <span class="kt">int</span> <span class="n">offset</span><span class="o">,</span> <span class="kt">float</span> <span class="n">fraction</span><span class="o">)</span> <span class="o">{</span>
-            <span class="kt">int</span> <span class="n">currentColor</span><span class="o">;</span>
-            <span class="k">if</span> <span class="o">(</span><span class="n">startColor</span> <span class="o">&gt;</span> <span class="n">endColor</span><span class="o">)</span> <span class="o">{</span>
-                <span class="n">currentColor</span> <span class="o">=</span> <span class="o">(</span><span class="kt">int</span><span class="o">)</span> <span class="o">(</span><span class="n">startColor</span> <span class="o">-</span> <span class="o">(</span><span class="n">fraction</span> <span class="o">*</span> <span class="n">colorDiff</span> <span class="o">-</span> <span class="n">offset</span><span class="o">));</span>
-                <span class="k">if</span> <span class="o">(</span><span class="n">currentColor</span> <span class="o">&lt;</span> <span class="n">endColor</span><span class="o">)</span> <span class="o">{</span>
-                    <span class="n">currentColor</span> <span class="o">=</span> <span class="n">endColor</span><span class="o">;</span>
-                <span class="o">}</span>
-            <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
-                <span class="n">currentColor</span> <span class="o">=</span> <span class="o">(</span><span class="kt">int</span><span class="o">)</span> <span class="o">(</span><span class="n">startColor</span> <span class="o">+</span> <span class="o">(</span><span class="n">fraction</span> <span class="o">*</span> <span class="n">colorDiff</span> <span class="o">-</span> <span class="n">offset</span><span class="o">));</span>
-                <span class="k">if</span> <span class="o">(</span><span class="n">currentColor</span> <span class="o">&gt;</span> <span class="n">endColor</span><span class="o">)</span> <span class="o">{</span>
-                    <span class="n">currentColor</span> <span class="o">=</span> <span class="n">endColor</span><span class="o">;</span>
-                <span class="o">}</span>
-            <span class="o">}</span>
-            <span class="k">return</span> <span class="n">currentColor</span><span class="o">;</span>
-        <span class="o">}</span>
-
-        <span class="cm">/**</span>
-<span class="cm">         * 将10进制颜色值转换成16进制。</span>
-<span class="cm">         */</span>
-        <span class="kd">private</span> <span class="n">String</span> <span class="nf">getHexString</span><span class="o">(</span><span class="kt">int</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
-            <span class="n">String</span> <span class="n">hexString</span> <span class="o">=</span> <span class="n">Integer</span><span class="o">.</span><span class="na">toHexString</span><span class="o">(</span><span class="n">value</span><span class="o">);</span>
-            <span class="k">if</span> <span class="o">(</span><span class="n">hexString</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">==</span> <span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
-                <span class="n">hexString</span> <span class="o">=</span> <span class="s">&quot;0&quot;</span> <span class="o">+</span> <span class="n">hexString</span><span class="o">;</span>
-            <span class="o">}</span>
-            <span class="k">return</span> <span class="n">hexString</span><span class="o">;</span>
-        <span class="o">}</span>
-    <span class="o">}</span>
-
-<span class="c1">// 属性动画中使用</span>
-<span class="n">ObjectAnimator</span> <span class="n">anim</span> <span class="o">=</span> <span class="n">ObjectAnimator</span><span class="o">.</span><span class="na">ofObject</span><span class="o">(</span><span class="n">view</span><span class="o">,</span> <span class="s">&quot;color&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">ColorEvaluator</span><span class="o">(),</span><span class="s">&quot;#ee00FF&quot;</span><span class="o">,</span> <span class="s">&quot;#FFee00&quot;</span><span class="o">);</span>
-<span class="n">anim</span><span class="o">.</span><span class="na">setDuration</span><span class="o">(</span><span class="mi">3000</span><span class="o">);</span>
-<span class="n">anim</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
-</pre></div>
-
-
-<p>效果如下：
-<img alt="" src="https://raw.githubusercontent.com/tuyc/tuyc.github.io/master/images/animation/animation.gif" /></p>
-<hr />
-<h3>Interpolator 插补器</h3>
-<p>Interpolator一直有使用，在属性动画中新增了一个TimeInterpolator接口，这个接口是用于兼容之前的Interpolator的，这使得所有过去的Interpolator实现类都可以直接拿过来放到属性动画当中使用，TimeInterpolator接口如下：</p>
-<div class="highlight"><pre><span></span><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">TimeInterpolator</span> <span class="o">{</span>
-    <span class="kt">float</span> <span class="nf">getInterpolation</span><span class="o">(</span><span class="kt">float</span> <span class="n">input</span><span class="o">);</span>
-<span class="o">}</span>
-</pre></div>
-
-
-<p>TimeInterpolator接口已经有非常多的实现类了，这些都是Android系统内置好的并且我们可以直接使用的Interpolator。</p>
-<p>AccelerateInterpolator 加速</p>
-<p>DecelerateInterpolator 减速</p>
-<p>BounceInterpolator   反弹（模拟球落地弹跳效果）</p>
-<p>LinearInterpolator源码：</p>
-<div class="highlight"><pre><span></span><span class="nd">@HasNativeInterpolator</span>
-<span class="kd">public</span> <span class="kd">class</span> <span class="nc">LinearInterpolator</span> <span class="kd">extends</span> <span class="n">BaseInterpolator</span> <span class="kd">implements</span> <span class="n">NativeInterpolatorFactory</span> <span class="o">{</span>
-
-    <span class="kd">public</span> <span class="nf">LinearInterpolator</span><span class="o">()</span> <span class="o">{</span>
-    <span class="o">}</span>
-
-    <span class="kd">public</span> <span class="nf">LinearInterpolator</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="n">AttributeSet</span> <span class="n">attrs</span><span class="o">)</span> <span class="o">{</span>
-    <span class="o">}</span>
-
-    <span class="kd">public</span> <span class="kt">float</span> <span class="nf">getInterpolation</span><span class="o">(</span><span class="kt">float</span> <span class="n">input</span><span class="o">)</span> <span class="o">{</span>
-        <span class="k">return</span> <span class="n">input</span><span class="o">;</span>
-    <span class="o">}</span>
-
-    <span class="cm">/** @hide */</span>
-    <span class="nd">@Override</span>
-    <span class="kd">public</span> <span class="kt">long</span> <span class="nf">createNativeInterpolator</span><span class="o">()</span> <span class="o">{</span>
-        <span class="k">return</span> <span class="n">NativeInterpolatorFactoryHelper</span><span class="o">.</span><span class="na">createLinearInterpolator</span><span class="o">();</span>
-    <span class="o">}</span>
-<span class="o">}</span>
-</pre></div>
-
-
-<p>最简单的情况就是input值和fraction值是相同的，这种情况由于input值是匀速增加的，因而fraction的值也是匀速增加的，所以动画的运动情况也是匀速的。</p>
-<p>再来看看复杂点的</p>
-<p>AccelerateDecelerateInterpolator(先加速后减速)源码：</p>
-<div class="highlight"><pre><span></span><span class="nd">@HasNativeInterpolator</span>
-<span class="kd">public</span> <span class="kd">class</span> <span class="nc">AccelerateDecelerateInterpolator</span> <span class="kd">implements</span> <span class="n">Interpolator</span><span class="o">,</span> <span class="n">NativeInterpolatorFactory</span> <span class="o">{</span>
-    <span class="kd">public</span> <span class="nf">AccelerateDecelerateInterpolator</span><span class="o">()</span> <span class="o">{</span>
-    <span class="o">}</span>
-
-    <span class="nd">@SuppressWarnings</span><span class="o">({</span><span class="s">&quot;UnusedDeclaration&quot;</span><span class="o">})</span>
-    <span class="kd">public</span> <span class="nf">AccelerateDecelerateInterpolator</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="n">AttributeSet</span> <span class="n">attrs</span><span class="o">)</span> <span class="o">{</span>
-    <span class="o">}</span>
-
-    <span class="kd">public</span> <span class="kt">float</span> <span class="nf">getInterpolation</span><span class="o">(</span><span class="kt">float</span> <span class="n">input</span><span class="o">)</span> <span class="o">{</span>
-        <span class="k">return</span> <span class="o">(</span><span class="kt">float</span><span class="o">)(</span><span class="n">Math</span><span class="o">.</span><span class="na">cos</span><span class="o">((</span><span class="n">input</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span> <span class="o">*</span> <span class="n">Math</span><span class="o">.</span><span class="na">PI</span><span class="o">)</span> <span class="o">/</span> <span class="mf">2.0f</span><span class="o">)</span> <span class="o">+</span> <span class="mf">0.5f</span><span class="o">;</span>
-    <span class="o">}</span>
-
-    <span class="cm">/** @hide */</span>
-    <span class="nd">@Override</span>
-    <span class="kd">public</span> <span class="kt">long</span> <span class="nf">createNativeInterpolator</span><span class="o">()</span> <span class="o">{</span>
-        <span class="k">return</span> <span class="n">NativeInterpolatorFactoryHelper</span><span class="o">.</span><span class="na">createAccelerateDecelerateInterpolator</span><span class="o">();</span>
-    <span class="o">}</span>
-<span class="o">}</span>
-</pre></div>
-
-
-<p>AccelerateDecelerateInterpolator曲线：</p>
-<p><img alt="" src="https://github.com/tuyc/tuyc.github.io/blob/master/images/animation/accelerate_decelerateInterpolator.png?raw=true" /></p>
-<p>可以看到，这是一个S型的曲线图，当横坐标从0变化到0.2的时候，纵坐标的变化幅度很小，但是之后就开始明显加速，最后横坐标从0.8变化到1的时候，纵坐标的变化幅度又变得很小。</p>
-<hr />
-<h3>AnimationSet常用API</h3>
-<div class="highlight"><pre><span></span><span class="cm">/**************** 常用部分1 *************/</span>
-<span class="n">AnimationSet</span> <span class="n">set</span> <span class="o">=</span> <span class="k">new</span> <span class="n">AnimationSet</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
-<span class="n">set</span><span class="o">.</span><span class="na">addAnimation</span><span class="o">(</span><span class="n">alpha</span><span class="o">);</span>
-<span class="o">...</span>
-
-<span class="n">set</span><span class="o">.</span><span class="na">setStartOffset</span><span class="o">(</span><span class="mi">1000</span><span class="o">);</span><span class="c1">//一秒后再执行动画 = 等待1秒后执行动画 set.setFillAfter(true);//设置动画执行后保持最后状态 set.setFillBefore(false);//设置动画执行后不回到原来状态 set.setRepeatCount(3);//设置动画重复执行的次数</span>
-
-<span class="cm">/**************** 常用部分2 *************/</span>
-<span class="c1">//通过AnimatiorSet来设计同步执行的多个属性动画</span>
-<span class="n">ObjectAnimator</span> <span class="n">animator1</span> <span class="o">=</span> <span class="n">ObjectAnimator</span><span class="o">.</span><span class="na">ofFloat</span><span class="o">(</span><span class="n">imageView</span><span class="o">,</span>
-                                  <span class="s">&quot;translationX&quot;</span><span class="o">,</span><span class="mf">0F</span><span class="o">,</span><span class="mi">360</span><span class="n">F</span><span class="o">);</span><span class="c1">//X轴平移旋转</span>
-<span class="n">ObjectAnimator</span> <span class="n">animator2</span> <span class="o">=</span> <span class="n">ObjectAnimator</span><span class="o">.</span><span class="na">ofFloat</span><span class="o">(</span><span class="n">imageView</span><span class="o">,</span>
-                                 <span class="s">&quot;translationY&quot;</span><span class="o">,</span> <span class="mf">0F</span><span class="o">,</span> <span class="mi">360</span><span class="n">F</span><span class="o">);</span><span class="c1">//Y轴平移旋转</span>
-<span class="n">ObjectAnimator</span> <span class="n">animator3</span> <span class="o">=</span> <span class="n">ObjectAnimator</span><span class="o">.</span><span class="na">ofFloat</span><span class="o">(</span><span class="n">imageView</span><span class="o">,</span>                
-                                  <span class="s">&quot;rotation&quot;</span><span class="o">,</span> <span class="mf">0F</span><span class="o">,</span> <span class="mi">360</span><span class="n">F</span><span class="o">);</span><span class="c1">//360度旋转</span>
-<span class="c1">//set.playSequentially(animator1, animator2, animator3);//分步执行</span>
-<span class="c1">//set.playTogether(animator1, animator2, animator3);//同步执行</span>
-<span class="c1">//属性动画的执行顺序控制</span>
-<span class="c1">// 先同步执行动画animator2和animator3,然后再执行animator1</span>
-<span class="n">set</span><span class="o">.</span><span class="na">play</span><span class="o">(</span><span class="n">animator3</span><span class="o">).</span><span class="na">with</span><span class="o">(</span><span class="n">animator1</span><span class="o">);</span>
-<span class="n">set</span><span class="o">.</span><span class="na">play</span><span class="o">(</span><span class="n">animator2</span><span class="o">).</span><span class="na">after</span><span class="o">(</span><span class="n">animator3</span><span class="o">);</span>
-<span class="n">set</span><span class="o">.</span><span class="na">setDuration</span><span class="o">(</span><span class="mi">1000</span><span class="o">);</span>
-<span class="n">set</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
-</pre></div>
-
-
-<h4>同步动画设计</h4>
-<div class="highlight"><pre><span></span>PropertyValuesHolder p1 = PropertyValuesHolder.ofFloat(&quot;translationX&quot;, 0, 360F);
-PropertyValuesHolder p2 = PropertyValuesHolder.ofFloat(&quot;translationY&quot;, 0, 360F);
-PropertyValuesHolder p3 = PropertyValuesHolder.ofFloat(&quot;rotation&quot;, 0, 360F);
-ObjectAnimator.ofPropertyValuesHolder(imageView, p1, p2 ,p3).setDuration(1000).start();
-</pre></div></div>
-        <hr />
-    </div>
-		
+    <span class="kd">public ...</span></pre></div> <a class="btn btn-info xsmall" href="/android-animation/yeyu_animation_vo_high.html">read more</a></div>
+    </div>	
+				
 
  
         
@@ -421,6 +707,7 @@ by <a class="url fn" href="/author/tuyc.html">tuyc</a>
                 
                 <li><a href="/android-animation/index.html">Android Animation</a></li>
                 <li><a href="/android-material-design/index.html">Android Material Design</a></li>
+                <li><a href="/ji-he/index.html">集合</a></li>
                 <li><a href="/misc/index.html">misc</a></li>
                 <li><a href="/xian-cheng/index.html">线程</a></li>
                    
@@ -459,7 +746,7 @@ by <a class="url fn" href="/author/tuyc.html">tuyc</a>
     </div>     </div> 
 <footer>
 <br />
-<p><a href="">tuyc</a> &copy; tuyc 2016</p>
+<p><a href="">tuyc</a> &copy; tuyc 2017</p>
 </footer>
 
 </div> <!-- /container -->
