@@ -62,15 +62,14 @@ by <a class="url fn" href="/author/tuyc.html">tuyc</a>
 
         </div>
 	
-        <div><p>[TOC]</p>
-<h3>Android 常用数据结构解析</h3>
+        <div><h3>Android 常用数据结构解析</h3>
 <p>本着共同学习的原则，来一波常用数据结构源码走读。包括ArrayList、LinkedList、HashMap。对这三种常用到的数据结构进行源码分析，本次列车解析主要包含各数据集合增、删、改、查。</p>
 <h4>ArrayList</h4>
 <ul>
 <li>ArrayList是List接口的可变数组的实现。实现了所有可选列表操作，并允许包括 null 在内的所有元素。</li>
 </ul>
 <p>数据结构：</p>
-<p><img alt="这里写图片描述" src="https://github.com/tuyc/tuyc.github.io/blob/master/images/WX20170718-171815@2x%E7%BA%BF%E6%80%A7%E5%AD%98%E5%82%A8.png?raw=true" /></p>
+<p><img alt="" src="https://github.com/tuyc/tuyc.github.io/blob/master/images/WX20170718-171815@2x%E7%BA%BF%E6%80%A7%E5%AD%98%E5%82%A8.png?raw=true" /></p>
 <p>线性表的顺序存储结构具有两个基本特点：</p>
 <ul>
 <li>线性表中所有元素所占的存储空间是连续的；</li>
@@ -78,118 +77,118 @@ by <a class="url fn" href="/author/tuyc.html">tuyc</a>
 </ul>
 <h5>源码</h5>
 <p>构造函数：</p>
-<div class="highlight"><pre><span></span><span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">Object</span><span class="o">[]</span> <span class="n">EMPTY_ELEMENTDATA</span> <span class="o">=</span> <span class="o">{};</span>
-<span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">DEFAULT_CAPACITY</span> <span class="o">=</span> <span class="mi">10</span><span class="o">;</span>
+<div class="highlight"><pre><span></span>private static final Object[] EMPTY_ELEMENTDATA = {};
+private static final int DEFAULT_CAPACITY = 10;
 
-<span class="kd">public</span> <span class="nf">ArrayList</span><span class="o">(</span><span class="kt">int</span> <span class="n">initialCapacity</span><span class="o">)</span> <span class="o">{</span>
-        <span class="kd">super</span><span class="o">();</span>
-        <span class="k">if</span> <span class="o">(</span><span class="n">initialCapacity</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span>
-            <span class="k">throw</span> <span class="k">new</span> <span class="n">IllegalArgumentException</span><span class="o">(</span><span class="s">&quot;Illegal Capacity: &quot;</span><span class="o">+</span>
-                                               <span class="n">initialCapacity</span><span class="o">);</span>
-        <span class="k">this</span><span class="o">.</span><span class="na">elementData</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[</span><span class="n">initialCapacity</span><span class="o">];</span>
-    <span class="o">}</span>
+public ArrayList(int initialCapacity) {
+        super();
+        if (initialCapacity &lt; 0)
+            throw new IllegalArgumentException(&quot;Illegal Capacity: &quot;+
+                                               initialCapacity);
+        this.elementData = new Object[initialCapacity];
+    }
 
-    <span class="kd">public</span> <span class="nf">ArrayList</span><span class="o">()</span> <span class="o">{</span>
-        <span class="kd">super</span><span class="o">();</span>
-        <span class="k">this</span><span class="o">.</span><span class="na">elementData</span> <span class="o">=</span> <span class="n">EMPTY_ELEMENTDATA</span><span class="o">;</span>
-    <span class="o">}</span>
+    public ArrayList() {
+        super();
+        this.elementData = EMPTY_ELEMENTDATA;
+    }
 </pre></div>
 
 
 <p>ArrayList有两个构造函数，一种是给定初始容量，一种是默认构造。使用默认构造函数是不会分配多余的空间的，由源码<code>private static final Object[] EMPTY_ELEMENTDATA = {};</code>可以看出。而对于已分配的空间数量不够情况会怎么办呢？在元素增加（执行add方法）的时候会调用<code>ensureCapacityInternal()</code>方法进行容量检查并扩充容量。下面就来Look下add、remove、set、get方法源码：</p>
-<div class="highlight"><pre><span></span><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">add</span><span class="o">(</span><span class="n">E</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
-    <span class="n">ensureCapacityInternal</span><span class="o">(</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span><span class="o">);</span>  <span class="c1">// Increments modCount!!</span>
-    <span class="n">elementData</span><span class="o">[</span><span class="n">size</span><span class="o">++]</span> <span class="o">=</span> <span class="n">e</span><span class="o">;</span>
-    <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
-<span class="o">}</span>
+<div class="highlight"><pre><span></span>public boolean add(E e) {
+    ensureCapacityInternal(size + 1);  // Increments modCount!!
+    elementData[size++] = e;
+    return true;
+}
 
-<span class="kd">public</span> <span class="kt">void</span> <span class="nf">add</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">,</span> <span class="n">E</span> <span class="n">element</span><span class="o">)</span> <span class="o">{</span>
-        <span class="k">if</span> <span class="o">(</span><span class="n">index</span> <span class="o">&gt;</span> <span class="n">size</span> <span class="o">||</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span>
-            <span class="k">throw</span> <span class="k">new</span> <span class="n">IndexOutOfBoundsException</span><span class="o">(</span><span class="n">outOfBoundsMsg</span><span class="o">(</span><span class="n">index</span><span class="o">));</span>
-        <span class="n">ensureCapacityInternal</span><span class="o">(</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span><span class="o">);</span>  <span class="c1">// Increments modCount!!</span>
-        <span class="n">System</span><span class="o">.</span><span class="na">arraycopy</span><span class="o">(</span><span class="n">elementData</span><span class="o">,</span> <span class="n">index</span><span class="o">,</span> <span class="n">elementData</span><span class="o">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="o">,</span> <span class="n">size</span> <span class="o">-</span> <span class="n">index</span><span class="o">);</span>
-        <span class="n">elementData</span><span class="o">[</span><span class="n">index</span><span class="o">]</span> <span class="o">=</span> <span class="n">element</span><span class="o">;</span>
-        <span class="n">size</span><span class="o">++;</span>
-<span class="o">}</span>
+public void add(int index, E element) {
+        if (index &gt; size || index &lt; 0)
+            throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
+        ensureCapacityInternal(size + 1);  // Increments modCount!!
+        System.arraycopy(elementData, index, elementData, index + 1, size - index);
+        elementData[index] = element;
+        size++;
+}
 
-<span class="kd">public</span> <span class="n">E</span> <span class="nf">remove</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span> <span class="o">{</span>
-        <span class="k">if</span> <span class="o">(</span><span class="n">index</span> <span class="o">&gt;=</span> <span class="n">size</span><span class="o">)</span>
-            <span class="k">throw</span> <span class="k">new</span> <span class="n">IndexOutOfBoundsException</span><span class="o">(</span><span class="n">outOfBoundsMsg</span><span class="o">(</span><span class="n">index</span><span class="o">));</span>
-        <span class="n">modCount</span><span class="o">++;</span>
-        <span class="n">E</span> <span class="n">oldValue</span> <span class="o">=</span> <span class="o">(</span><span class="n">E</span><span class="o">)</span> <span class="n">elementData</span><span class="o">[</span><span class="n">index</span><span class="o">];</span>
+public E remove(int index) {
+        if (index &gt;= size)
+            throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
+        modCount++;
+        E oldValue = (E) elementData[index];
 
-        <span class="kt">int</span> <span class="n">numMoved</span> <span class="o">=</span> <span class="n">size</span> <span class="o">-</span> <span class="n">index</span> <span class="o">-</span> <span class="mi">1</span><span class="o">;</span>
-        <span class="k">if</span> <span class="o">(</span><span class="n">numMoved</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span>
-            <span class="n">System</span><span class="o">.</span><span class="na">arraycopy</span><span class="o">(</span><span class="n">elementData</span><span class="o">,</span> <span class="n">index</span><span class="o">+</span><span class="mi">1</span><span class="o">,</span> <span class="n">elementData</span><span class="o">,</span> <span class="n">index</span><span class="o">,</span> <span class="n">numMoved</span><span class="o">);</span>
-        <span class="n">elementData</span><span class="o">[--</span><span class="n">size</span><span class="o">]</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span> <span class="c1">// clear to let GC do its work</span>
+        int numMoved = size - index - 1;
+        if (numMoved &gt; 0)
+            System.arraycopy(elementData, index+1, elementData, index, numMoved);
+        elementData[--size] = null; // clear to let GC do its work
 
-        <span class="k">return</span> <span class="n">oldValue</span><span class="o">;</span>
-<span class="o">}</span>
+        return oldValue;
+}
 
-<span class="kd">public</span> <span class="n">E</span> <span class="nf">get</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span> <span class="o">{</span>
-        <span class="k">if</span> <span class="o">(</span><span class="n">index</span> <span class="o">&gt;=</span> <span class="n">size</span><span class="o">)</span>
-            <span class="k">throw</span> <span class="k">new</span> <span class="n">IndexOutOfBoundsException</span><span class="o">(</span><span class="n">outOfBoundsMsg</span><span class="o">(</span><span class="n">index</span><span class="o">));</span>
+public E get(int index) {
+        if (index &gt;= size)
+            throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
 
-        <span class="k">return</span> <span class="o">(</span><span class="n">E</span><span class="o">)</span> <span class="n">elementData</span><span class="o">[</span><span class="n">index</span><span class="o">];</span>
- <span class="o">}</span>
+        return (E) elementData[index];
+ }
 
- <span class="kd">public</span> <span class="n">E</span> <span class="nf">set</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">,</span> <span class="n">E</span> <span class="n">element</span><span class="o">)</span> <span class="o">{</span>
-        <span class="k">if</span> <span class="o">(</span><span class="n">index</span> <span class="o">&gt;=</span> <span class="n">size</span><span class="o">)</span>
-            <span class="k">throw</span> <span class="k">new</span> <span class="n">IndexOutOfBoundsException</span><span class="o">(</span><span class="n">outOfBoundsMsg</span><span class="o">(</span><span class="n">index</span><span class="o">));</span>
+ public E set(int index, E element) {
+        if (index &gt;= size)
+            throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
 
-        <span class="n">E</span> <span class="n">oldValue</span> <span class="o">=</span> <span class="o">(</span><span class="n">E</span><span class="o">)</span> <span class="n">elementData</span><span class="o">[</span><span class="n">index</span><span class="o">];</span>
-        <span class="n">elementData</span><span class="o">[</span><span class="n">index</span><span class="o">]</span> <span class="o">=</span> <span class="n">element</span><span class="o">;</span>
-        <span class="k">return</span> <span class="n">oldValue</span><span class="o">;</span>
- <span class="o">}</span>
+        E oldValue = (E) elementData[index];
+        elementData[index] = element;
+        return oldValue;
+ }
 </pre></div>
 
 
 <p>ArrayList的数据操作都是简单的数组操作，这里主要介绍下两个方法：<code>ensureCapacityInternal</code>和<code>System.arraycopy</code>。System.arraycopy是数组操作的核心方法，理解了它你就理解了数组世界。</p>
 <h6>ensureCapacityInternal</h6>
-<div class="highlight"><pre><span></span><span class="kd">public</span> <span class="kt">void</span> <span class="nf">ensureCapacity</span><span class="o">(</span><span class="kt">int</span> <span class="n">minCapacity</span><span class="o">)</span> <span class="o">{</span>
-        <span class="kt">int</span> <span class="n">minExpand</span> <span class="o">=</span> <span class="o">(</span><span class="n">elementData</span> <span class="o">!=</span> <span class="n">EMPTY_ELEMENTDATA</span><span class="o">)</span>
-            <span class="c1">// any size if real element table</span>
-            <span class="o">?</span> <span class="mi">0</span>
-            <span class="c1">// larger than default for empty table. It&#39;s already supposed to be</span>
-            <span class="c1">// at default size.</span>
-            <span class="o">:</span> <span class="n">DEFAULT_CAPACITY</span><span class="o">;</span>
+<div class="highlight"><pre><span></span>public void ensureCapacity(int minCapacity) {
+        int minExpand = (elementData != EMPTY_ELEMENTDATA)
+            // any size if real element table
+            ? 0
+            // larger than default for empty table. It&#39;s already supposed to be
+            // at default size.
+            : DEFAULT_CAPACITY;
 
-        <span class="k">if</span> <span class="o">(</span><span class="n">minCapacity</span> <span class="o">&gt;</span> <span class="n">minExpand</span><span class="o">)</span> <span class="o">{</span>
-            <span class="n">ensureExplicitCapacity</span><span class="o">(</span><span class="n">minCapacity</span><span class="o">);</span>
-        <span class="o">}</span>
-    <span class="o">}</span>
+        if (minCapacity &gt; minExpand) {
+            ensureExplicitCapacity(minCapacity);
+        }
+    }
 
-    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">ensureCapacityInternal</span><span class="o">(</span><span class="kt">int</span> <span class="n">minCapacity</span><span class="o">)</span> <span class="o">{</span>
-        <span class="k">if</span> <span class="o">(</span><span class="n">elementData</span> <span class="o">==</span> <span class="n">EMPTY_ELEMENTDATA</span><span class="o">)</span> <span class="o">{</span>
-            <span class="n">minCapacity</span> <span class="o">=</span> <span class="n">Math</span><span class="o">.</span><span class="na">max</span><span class="o">(</span><span class="n">DEFAULT_CAPACITY</span><span class="o">,</span> <span class="n">minCapacity</span><span class="o">);</span>
-        <span class="o">}</span>
+    private void ensureCapacityInternal(int minCapacity) {
+        if (elementData == EMPTY_ELEMENTDATA) {
+            minCapacity = Math.max(DEFAULT_CAPACITY, minCapacity);
+        }
 
-        <span class="n">ensureExplicitCapacity</span><span class="o">(</span><span class="n">minCapacity</span><span class="o">);</span>
-    <span class="o">}</span>
+        ensureExplicitCapacity(minCapacity);
+    }
 
-    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">ensureExplicitCapacity</span><span class="o">(</span><span class="kt">int</span> <span class="n">minCapacity</span><span class="o">)</span> <span class="o">{</span>
-        <span class="n">modCount</span><span class="o">++;</span>
+    private void ensureExplicitCapacity(int minCapacity) {
+        modCount++;
 
-        <span class="c1">// overflow-conscious code</span>
-        <span class="k">if</span> <span class="o">(</span><span class="n">minCapacity</span> <span class="o">-</span> <span class="n">elementData</span><span class="o">.</span><span class="na">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span>
-            <span class="n">grow</span><span class="o">(</span><span class="n">minCapacity</span><span class="o">);</span>
-    <span class="o">}</span>
+        // overflow-conscious code
+        if (minCapacity - elementData.length &gt; 0)
+            grow(minCapacity);
+    }
 </pre></div>
 
 
 <p>你阅读代码后发现，居然都是容量是否足够上的逻辑判断，容量不够的情况最后走到的是<code>grow()</code>方法。</p>
 <p>数组容量增长：</p>
-<div class="highlight"><pre><span></span><span class="kd">private</span> <span class="kt">void</span> <span class="nf">grow</span><span class="o">(</span><span class="kt">int</span> <span class="n">minCapacity</span><span class="o">)</span> <span class="o">{</span>
-        <span class="c1">// overflow-conscious code</span>
-        <span class="kt">int</span> <span class="n">oldCapacity</span> <span class="o">=</span> <span class="n">elementData</span><span class="o">.</span><span class="na">length</span><span class="o">;</span>
-        <span class="kt">int</span> <span class="n">newCapacity</span> <span class="o">=</span> <span class="n">oldCapacity</span> <span class="o">+</span> <span class="o">(</span><span class="n">oldCapacity</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="o">);</span>
-        <span class="k">if</span> <span class="o">(</span><span class="n">newCapacity</span> <span class="o">-</span> <span class="n">minCapacity</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span>
-            <span class="n">newCapacity</span> <span class="o">=</span> <span class="n">minCapacity</span><span class="o">;</span>
-        <span class="k">if</span> <span class="o">(</span><span class="n">newCapacity</span> <span class="o">-</span> <span class="n">MAX_ARRAY_SIZE</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span>
-            <span class="n">newCapacity</span> <span class="o">=</span> <span class="n">hugeCapacity</span><span class="o">(</span><span class="n">minCapacity</span><span class="o">);</span>
-        <span class="c1">// minCapacity is usually close to size, so this is a win:</span>
-        <span class="n">elementData</span> <span class="o">=</span> <span class="n">Arrays</span><span class="o">.</span><span class="na">copyOf</span><span class="o">(</span><span class="n">elementData</span><span class="o">,</span> <span class="n">newCapacity</span><span class="o">);</span>
-<span class="o">}</span>
+<div class="highlight"><pre><span></span>private void grow(int minCapacity) {
+        // overflow-conscious code
+        int oldCapacity = elementData.length;
+        int newCapacity = oldCapacity + (oldCapacity &gt;&gt; 1);
+        if (newCapacity - minCapacity &lt; 0)
+            newCapacity = minCapacity;
+        if (newCapacity - MAX_ARRAY_SIZE &gt; 0)
+            newCapacity = hugeCapacity(minCapacity);
+        // minCapacity is usually close to size, so this is a win:
+        elementData = Arrays.copyOf(elementData, newCapacity);
+}
 </pre></div>
 
 
@@ -201,10 +200,10 @@ by <a class="url fn" href="/author/tuyc.html">tuyc</a>
 <span class="cm"> * @param      dest     目的数组</span>
 <span class="cm"> * @param      destPos  目的数组放置的起始位置</span>
 <span class="cm"> * @param      length   复制的长度</span>
-<span class="cm"> */</span>
-<span class="kd">public</span> <span class="kd">static</span> <span class="kd">native</span> <span class="kt">void</span> <span class="nf">arraycopy</span><span class="o">(</span><span class="n">Object</span> <span class="n">src</span><span class="o">,</span>  <span class="kt">int</span>  <span class="n">srcPos</span><span class="o">,</span>
-                                        <span class="n">Object</span> <span class="n">dest</span><span class="o">,</span> <span class="kt">int</span> <span class="n">destPos</span><span class="o">,</span>
-                                        <span class="kt">int</span> <span class="n">length</span><span class="o">);</span>
+<span class="cm"> */</span><span class="w"></span>
+public<span class="w"> </span>static<span class="w"> </span>native<span class="w"> </span>void<span class="w"> </span>arraycopy<span class="o">(</span>Object<span class="w"> </span>src<span class="o">,</span><span class="w">  </span>int<span class="w">  </span>srcPos<span class="o">,</span><span class="w"></span>
+<span class="w">                                        </span>Object<span class="w"> </span>dest<span class="o">,</span><span class="w"> </span>int<span class="w"> </span>destPos<span class="o">,</span><span class="w"></span>
+<span class="w">                                        </span>int<span class="w"> </span>length<span class="o">)</span><span class="err">;</span><span class="w"></span>
 </pre></div>
 
 
@@ -226,117 +225,117 @@ by <a class="url fn" href="/author/tuyc.html">tuyc</a>
 </ul>
 <h5>源码</h5>
 <p>构造函数：</p>
-<div class="highlight"><pre><span></span>    <span class="kd">public</span> <span class="nf">LinkedList</span><span class="o">()</span> <span class="o">{</span>
-    <span class="o">}</span>
+<div class="highlight"><pre><span></span>    <span class="kr">public</span> <span class="nx">LinkedList</span><span class="p">()</span> <span class="p">{</span>
+    <span class="p">}</span>
 
-    <span class="kd">public</span> <span class="nf">LinkedList</span><span class="o">(</span><span class="n">Collection</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">E</span><span class="o">&gt;</span> <span class="n">c</span><span class="o">)</span> <span class="o">{</span>
-        <span class="k">this</span><span class="o">();</span>
-        <span class="n">addAll</span><span class="o">(</span><span class="n">c</span><span class="o">);</span>
-    <span class="o">}</span>
+    <span class="kr">public</span> <span class="nx">LinkedList</span><span class="p">(</span><span class="nx">Collection</span><span class="cp">&lt;?</span> <span class="k">extends</span> <span class="nx">E</span><span class="o">&gt;</span> <span class="nx">c</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">();</span>
+        <span class="nx">addAll</span><span class="p">(</span><span class="nx">c</span><span class="p">);</span>
+    <span class="p">}</span>
 </pre></div>
 
 
 <p>LinkedList的构造函数有两个：一种是默认构造和一种是给初始集合数据。使用有参构造函数会把Collection数据依次取出放到链表的尾部。这里先来看一下构造函数中使用到的<code>addAll()</code>方法：</p>
-<div class="highlight"><pre><span></span>    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">addAll</span><span class="o">(</span><span class="n">Collection</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">E</span><span class="o">&gt;</span> <span class="n">c</span><span class="o">)</span> <span class="o">{</span>
-        <span class="k">return</span> <span class="n">addAll</span><span class="o">(</span><span class="n">size</span><span class="o">,</span> <span class="n">c</span><span class="o">);</span>
-    <span class="o">}</span>
+<div class="highlight"><pre><span></span>    <span class="kr">public</span> <span class="kr">boolean</span> <span class="nx">addAll</span><span class="p">(</span><span class="nx">Collection</span><span class="cp">&lt;?</span> <span class="k">extends</span> <span class="nx">E</span><span class="o">&gt;</span> <span class="nx">c</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">addAll</span><span class="p">(</span><span class="nx">size</span><span class="p">,</span> <span class="nx">c</span><span class="p">);</span>
+    <span class="p">}</span>
 
-    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">addAll</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">,</span> <span class="n">Collection</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">E</span><span class="o">&gt;</span> <span class="n">c</span><span class="o">)</span> <span class="o">{</span>
-        <span class="n">checkPositionIndex</span><span class="o">(</span><span class="n">index</span><span class="o">);</span>
+    <span class="k">public</span> <span class="nx">boolean</span> <span class="nx">addAll</span><span class="p">(</span><span class="nx">int</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">Collection</span><span class="o">&lt;?</span> <span class="k">extends</span> <span class="nx">E</span><span class="o">&gt;</span> <span class="nx">c</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">checkPositionIndex</span><span class="p">(</span><span class="nx">index</span><span class="p">);</span>
 
-        <span class="n">Object</span><span class="o">[]</span> <span class="n">a</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="na">toArray</span><span class="o">();</span>
-        <span class="kt">int</span> <span class="n">numNew</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="na">length</span><span class="o">;</span>
-        <span class="k">if</span> <span class="o">(</span><span class="n">numNew</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span>
-            <span class="k">return</span> <span class="kc">false</span><span class="o">;</span>
+        <span class="nx">Object</span><span class="p">[]</span> <span class="nx">a</span> <span class="o">=</span> <span class="nx">c</span><span class="o">.</span><span class="nx">toArray</span><span class="p">();</span>
+        <span class="nx">int</span> <span class="nx">numNew</span> <span class="o">=</span> <span class="nx">a</span><span class="o">.</span><span class="nx">length</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">numNew</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">return</span> <span class="k">false</span><span class="p">;</span>
 
-        <span class="n">Node</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">pred</span><span class="o">,</span> <span class="n">succ</span><span class="o">;</span>
-        <span class="k">if</span> <span class="o">(</span><span class="n">index</span> <span class="o">==</span> <span class="n">size</span><span class="o">)</span> <span class="o">{</span>
-            <span class="n">succ</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
-            <span class="n">pred</span> <span class="o">=</span> <span class="n">last</span><span class="o">;</span>
-        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
-            <span class="n">succ</span> <span class="o">=</span> <span class="n">node</span><span class="o">(</span><span class="n">index</span><span class="o">);</span>
-            <span class="n">pred</span> <span class="o">=</span> <span class="n">succ</span><span class="o">.</span><span class="na">prev</span><span class="o">;</span>
-        <span class="o">}</span>
+        <span class="nx">Node</span><span class="o">&lt;</span><span class="nx">E</span><span class="o">&gt;</span> <span class="nx">pred</span><span class="p">,</span> <span class="nx">succ</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">index</span> <span class="o">==</span> <span class="nx">size</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">succ</span> <span class="o">=</span> <span class="k">null</span><span class="p">;</span>
+            <span class="nx">pred</span> <span class="o">=</span> <span class="nx">last</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nx">succ</span> <span class="o">=</span> <span class="nx">node</span><span class="p">(</span><span class="nx">index</span><span class="p">);</span>
+            <span class="nx">pred</span> <span class="o">=</span> <span class="nx">succ</span><span class="o">.</span><span class="nb">prev</span><span class="p">;</span>
+        <span class="p">}</span>
 
-        <span class="k">for</span> <span class="o">(</span><span class="n">Object</span> <span class="n">o</span> <span class="o">:</span> <span class="n">a</span><span class="o">)</span> <span class="o">{</span>
-            <span class="nd">@SuppressWarnings</span><span class="o">(</span><span class="s">&quot;unchecked&quot;</span><span class="o">)</span> <span class="n">E</span> <span class="n">e</span> <span class="o">=</span> <span class="o">(</span><span class="n">E</span><span class="o">)</span> <span class="n">o</span><span class="o">;</span>
-            <span class="n">Node</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">newNode</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Node</span><span class="o">&lt;&gt;(</span><span class="n">pred</span><span class="o">,</span> <span class="n">e</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
-            <span class="k">if</span> <span class="o">(</span><span class="n">pred</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span>
-                <span class="n">first</span> <span class="o">=</span> <span class="n">newNode</span><span class="o">;</span>
+        <span class="k">for</span> <span class="p">(</span><span class="nx">Object</span> <span class="nx">o</span> <span class="o">:</span> <span class="nx">a</span><span class="p">)</span> <span class="p">{</span>
+            <span class="o">@</span><span class="nx">SuppressWarnings</span><span class="p">(</span><span class="s2">&quot;unchecked&quot;</span><span class="p">)</span> <span class="nx">E</span> <span class="nx">e</span> <span class="o">=</span> <span class="p">(</span><span class="nx">E</span><span class="p">)</span> <span class="nx">o</span><span class="p">;</span>
+            <span class="nx">Node</span><span class="o">&lt;</span><span class="nx">E</span><span class="o">&gt;</span> <span class="nx">newNode</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Node</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="nx">pred</span><span class="p">,</span> <span class="nx">e</span><span class="p">,</span> <span class="k">null</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">pred</span> <span class="o">==</span> <span class="k">null</span><span class="p">)</span>
+                <span class="nx">first</span> <span class="o">=</span> <span class="nx">newNode</span><span class="p">;</span>
             <span class="k">else</span>
-                <span class="n">pred</span><span class="o">.</span><span class="na">next</span> <span class="o">=</span> <span class="n">newNode</span><span class="o">;</span>
-            <span class="n">pred</span> <span class="o">=</span> <span class="n">newNode</span><span class="o">;</span>
-        <span class="o">}</span>
+                <span class="nx">pred</span><span class="o">.</span><span class="nb">next</span> <span class="o">=</span> <span class="nx">newNode</span><span class="p">;</span>
+            <span class="nx">pred</span> <span class="o">=</span> <span class="nx">newNode</span><span class="p">;</span>
+        <span class="p">}</span>
 
-        <span class="k">if</span> <span class="o">(</span><span class="n">succ</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
-            <span class="n">last</span> <span class="o">=</span> <span class="n">pred</span><span class="o">;</span>
-        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
-            <span class="n">pred</span><span class="o">.</span><span class="na">next</span> <span class="o">=</span> <span class="n">succ</span><span class="o">;</span>
-            <span class="n">succ</span><span class="o">.</span><span class="na">prev</span> <span class="o">=</span> <span class="n">pred</span><span class="o">;</span>
-        <span class="o">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">succ</span> <span class="o">==</span> <span class="k">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">last</span> <span class="o">=</span> <span class="nx">pred</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nx">pred</span><span class="o">.</span><span class="nb">next</span> <span class="o">=</span> <span class="nx">succ</span><span class="p">;</span>
+            <span class="nx">succ</span><span class="o">.</span><span class="nb">prev</span> <span class="o">=</span> <span class="nx">pred</span><span class="p">;</span>
+        <span class="p">}</span>
 
-        <span class="n">size</span> <span class="o">+=</span> <span class="n">numNew</span><span class="o">;</span>
-        <span class="n">modCount</span><span class="o">++;</span>
-        <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
-    <span class="o">}</span>
+        <span class="nx">size</span> <span class="o">+=</span> <span class="nx">numNew</span><span class="p">;</span>
+        <span class="nx">modCount</span><span class="o">++</span><span class="p">;</span>
+        <span class="k">return</span> <span class="k">true</span><span class="p">;</span>
+    <span class="p">}</span>
 </pre></div>
 
 
 <p>这个方法的功能就是将Collection集合的全部数据拿出来放到index索引开始的链表上，可能是表头、表中、表尾，根据index参数决定。</p>
 <p>下面来Look下add、remove、set、get，以及队列和栈常用方法源码：</p>
-<div class="highlight"><pre><span></span><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">add</span><span class="o">(</span><span class="n">E</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
-        <span class="n">linkLast</span><span class="o">(</span><span class="n">e</span><span class="o">);</span>
-        <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
-<span class="o">}</span>
+<div class="highlight"><pre><span></span>public boolean add(E e) {
+        linkLast(e);
+        return true;
+}
 
-<span class="kt">void</span> <span class="nf">linkLast</span><span class="o">(</span><span class="n">E</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
-        <span class="kd">final</span> <span class="n">Node</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">l</span> <span class="o">=</span> <span class="n">last</span><span class="o">;</span>
-        <span class="kd">final</span> <span class="n">Node</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">newNode</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Node</span><span class="o">&lt;&gt;(</span><span class="n">l</span><span class="o">,</span> <span class="n">e</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
-        <span class="n">last</span> <span class="o">=</span> <span class="n">newNode</span><span class="o">;</span>
-        <span class="k">if</span> <span class="o">(</span><span class="n">l</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span>
-            <span class="n">first</span> <span class="o">=</span> <span class="n">newNode</span><span class="o">;</span>
-        <span class="k">else</span>
-            <span class="n">l</span><span class="o">.</span><span class="na">next</span> <span class="o">=</span> <span class="n">newNode</span><span class="o">;</span>
-        <span class="n">size</span><span class="o">++;</span>
-        <span class="n">modCount</span><span class="o">++;</span>
-<span class="o">}</span> 
+void linkLast(E e) {
+        final Node&lt;E&gt; l = last;
+        final Node&lt;E&gt; newNode = new Node&lt;&gt;(l, e, null);
+        last = newNode;
+        if (l == null)
+            first = newNode;
+        else
+            l.next = newNode;
+        size++;
+        modCount++;
+} 
 
-<span class="kd">public</span> <span class="n">E</span> <span class="nf">remove</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span> <span class="o">{</span>
-        <span class="n">checkElementIndex</span><span class="o">(</span><span class="n">index</span><span class="o">);</span>
-        <span class="k">return</span> <span class="n">unlink</span><span class="o">(</span><span class="n">node</span><span class="o">(</span><span class="n">index</span><span class="o">));</span>
-<span class="o">}</span>
+public E remove(int index) {
+        checkElementIndex(index);
+        return unlink(node(index));
+}
 
- <span class="kd">public</span> <span class="n">E</span> <span class="nf">set</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">,</span> <span class="n">E</span> <span class="n">element</span><span class="o">)</span> <span class="o">{</span>
-        <span class="n">checkElementIndex</span><span class="o">(</span><span class="n">index</span><span class="o">);</span>
-        <span class="n">Node</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">node</span><span class="o">(</span><span class="n">index</span><span class="o">);</span>
-        <span class="n">E</span> <span class="n">oldVal</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="na">item</span><span class="o">;</span>
-        <span class="n">x</span><span class="o">.</span><span class="na">item</span> <span class="o">=</span> <span class="n">element</span><span class="o">;</span>
-        <span class="k">return</span> <span class="n">oldVal</span><span class="o">;</span>
- <span class="o">}</span>
+ public E set(int index, E element) {
+        checkElementIndex(index);
+        Node&lt;E&gt; x = node(index);
+        E oldVal = x.item;
+        x.item = element;
+        return oldVal;
+ }
 
- <span class="kd">public</span> <span class="n">E</span> <span class="nf">get</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span> <span class="o">{</span>
-        <span class="n">checkElementIndex</span><span class="o">(</span><span class="n">index</span><span class="o">);</span>
-        <span class="k">return</span> <span class="n">node</span><span class="o">(</span><span class="n">index</span><span class="o">).</span><span class="na">item</span><span class="o">;</span>
- <span class="o">}</span>
+ public E get(int index) {
+        checkElementIndex(index);
+        return node(index).item;
+ }
 
- <span class="cm">/*******************队列*****************/</span>
- <span class="kd">public</span> <span class="n">E</span> <span class="nf">poll</span><span class="o">()</span> <span class="o">{</span>
-        <span class="kd">final</span> <span class="n">Node</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">f</span> <span class="o">=</span> <span class="n">first</span><span class="o">;</span>
-        <span class="k">return</span> <span class="o">(</span><span class="n">f</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">?</span> <span class="kc">null</span> <span class="o">:</span> <span class="n">unlinkFirst</span><span class="o">(</span><span class="n">f</span><span class="o">);</span>
-  <span class="o">}</span>
+ /*******************队列*****************/
+ public E poll() {
+        final Node&lt;E&gt; f = first;
+        return (f == null) ? null : unlinkFirst(f);
+  }
 
-  <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">offer</span><span class="o">(</span><span class="n">E</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
-        <span class="k">return</span> <span class="n">add</span><span class="o">(</span><span class="n">e</span><span class="o">);</span>
-  <span class="o">}</span>
+  public boolean offer(E e) {
+        return add(e);
+  }
 
-<span class="cm">/****************栈******************/</span>
-<span class="kd">public</span> <span class="kt">void</span> <span class="nf">push</span><span class="o">(</span><span class="n">E</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
-    <span class="n">addFirst</span><span class="o">(</span><span class="n">e</span><span class="o">);</span>
-<span class="o">}</span>
+/****************栈******************/
+public void push(E e) {
+    addFirst(e);
+}
 
-<span class="kd">public</span> <span class="n">E</span> <span class="nf">pop</span><span class="o">()</span> <span class="o">{</span>
-    <span class="k">return</span> <span class="n">removeFirst</span><span class="o">();</span>
-<span class="o">}</span>
+public E pop() {
+    return removeFirst();
+}
 </pre></div>
 
 
@@ -351,41 +350,41 @@ by <a class="url fn" href="/author/tuyc.html">tuyc</a>
 <li>插入、获取的时间复杂度基本是 O(1)</li>
 </ul>
 <p>数据结构：</p>
-<p><img alt="img" src="https://github.com/tuyc/tuyc.github.io/blob/master/images/WX20170719-001915@2x.png?raw=true" /></p>
+<p><img alt="" src="https://github.com/tuyc/tuyc.github.io/blob/master/images/WX20170719-001915@2x.png?raw=true" /></p>
 <h5>源码</h5>
 <p>构造函数：</p>
-<div class="highlight"><pre><span></span><span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">DEFAULT_INITIAL_CAPACITY</span> <span class="o">=</span> <span class="mi">4</span><span class="o">;</span> 
-<span class="kd">static</span> <span class="kd">final</span> <span class="kt">float</span> <span class="n">DEFAULT_LOAD_FACTOR</span> <span class="o">=</span> <span class="mf">0.75f</span><span class="o">;</span>
+<div class="highlight"><pre><span></span><span class="kr">static</span> <span class="kr">final</span> <span class="kr">int</span> <span class="nx">DEFAULT_INITIAL_CAPACITY</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span> 
+<span class="kr">static</span> <span class="kr">final</span> <span class="kr">float</span> <span class="nx">DEFAULT_LOAD_FACTOR</span> <span class="o">=</span> <span class="mf">0.75f</span><span class="p">;</span>
 
-<span class="kd">public</span> <span class="nf">HashMap</span><span class="o">(</span><span class="kt">int</span> <span class="n">initialCapacity</span><span class="o">,</span> <span class="kt">float</span> <span class="n">loadFactor</span><span class="o">)</span> <span class="o">{</span>
-        <span class="k">if</span> <span class="o">(</span><span class="n">initialCapacity</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span>
-            <span class="k">throw</span> <span class="k">new</span> <span class="n">IllegalArgumentException</span><span class="o">(</span><span class="s">&quot;Illegal initial capacity: &quot;</span> <span class="o">+</span> <span class="n">initialCapacity</span><span class="o">);</span>
-        <span class="k">if</span> <span class="o">(</span><span class="n">initialCapacity</span> <span class="o">&gt;</span> <span class="n">MAXIMUM_CAPACITY</span><span class="o">)</span> <span class="o">{</span>
-            <span class="n">initialCapacity</span> <span class="o">=</span> <span class="n">MAXIMUM_CAPACITY</span><span class="o">;</span>
-        <span class="o">}</span> <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">initialCapacity</span> <span class="o">&lt;</span> <span class="n">DEFAULT_INITIAL_CAPACITY</span><span class="o">)</span> <span class="o">{</span>
-            <span class="n">initialCapacity</span> <span class="o">=</span> <span class="n">DEFAULT_INITIAL_CAPACITY</span><span class="o">;</span>
-        <span class="o">}</span>
+<span class="kr">public</span> <span class="nx">HashMap</span><span class="p">(</span><span class="kr">int</span> <span class="nx">initialCapacity</span><span class="p">,</span> <span class="kr">float</span> <span class="nx">loadFactor</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">initialCapacity</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nx">IllegalArgumentException</span><span class="p">(</span><span class="s2">&quot;Illegal initial capacity: &quot;</span> <span class="o">+</span> <span class="nx">initialCapacity</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">initialCapacity</span> <span class="o">&gt;</span> <span class="nx">MAXIMUM_CAPACITY</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">initialCapacity</span> <span class="o">=</span> <span class="nx">MAXIMUM_CAPACITY</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">initialCapacity</span> <span class="o">&lt;</span> <span class="nx">DEFAULT_INITIAL_CAPACITY</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">initialCapacity</span> <span class="o">=</span> <span class="nx">DEFAULT_INITIAL_CAPACITY</span><span class="p">;</span>
+        <span class="p">}</span>
 
-        <span class="k">if</span> <span class="o">(</span><span class="n">loadFactor</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="o">||</span> <span class="n">Float</span><span class="o">.</span><span class="na">isNaN</span><span class="o">(</span><span class="n">loadFactor</span><span class="o">))</span>
-            <span class="k">throw</span> <span class="k">new</span> <span class="n">IllegalArgumentException</span><span class="o">(</span><span class="s">&quot;Illegal load factor: &quot;</span> <span class="o">+</span> <span class="n">loadFactor</span><span class="o">);</span>
-        <span class="n">threshold</span> <span class="o">=</span> <span class="n">initialCapacity</span><span class="o">;</span>
-        <span class="n">init</span><span class="o">();</span>
-    <span class="o">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">loadFactor</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="o">||</span> <span class="nx">Float</span><span class="p">.</span><span class="nb">isNaN</span><span class="p">(</span><span class="nx">loadFactor</span><span class="p">))</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nx">IllegalArgumentException</span><span class="p">(</span><span class="s2">&quot;Illegal load factor: &quot;</span> <span class="o">+</span> <span class="nx">loadFactor</span><span class="p">);</span>
+        <span class="nx">threshold</span> <span class="o">=</span> <span class="nx">initialCapacity</span><span class="p">;</span>
+        <span class="nx">init</span><span class="p">();</span>
+    <span class="p">}</span>
 
-    <span class="kd">public</span> <span class="nf">HashMap</span><span class="o">(</span><span class="kt">int</span> <span class="n">initialCapacity</span><span class="o">)</span> <span class="o">{</span>
-        <span class="k">this</span><span class="o">(</span><span class="n">initialCapacity</span><span class="o">,</span> <span class="n">DEFAULT_LOAD_FACTOR</span><span class="o">);</span>
-    <span class="o">}</span>
+    <span class="kr">public</span> <span class="nx">HashMap</span><span class="p">(</span><span class="kr">int</span> <span class="nx">initialCapacity</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">(</span><span class="nx">initialCapacity</span><span class="p">,</span> <span class="nx">DEFAULT_LOAD_FACTOR</span><span class="p">);</span>
+    <span class="p">}</span>
 
-    <span class="kd">public</span> <span class="nf">HashMap</span><span class="o">()</span> <span class="o">{</span>
-        <span class="k">this</span><span class="o">(</span><span class="n">DEFAULT_INITIAL_CAPACITY</span><span class="o">,</span> <span class="n">DEFAULT_LOAD_FACTOR</span><span class="o">);</span>
-    <span class="o">}</span>
+    <span class="kr">public</span> <span class="nx">HashMap</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">(</span><span class="nx">DEFAULT_INITIAL_CAPACITY</span><span class="p">,</span> <span class="nx">DEFAULT_LOAD_FACTOR</span><span class="p">);</span>
+    <span class="p">}</span>
 
-    <span class="kd">public</span> <span class="nf">HashMap</span><span class="o">(</span><span class="n">Map</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">K</span><span class="o">,</span> <span class="o">?</span> <span class="kd">extends</span> <span class="n">V</span><span class="o">&gt;</span> <span class="n">m</span><span class="o">)</span> <span class="o">{</span>
-        <span class="k">this</span><span class="o">(</span><span class="n">Math</span><span class="o">.</span><span class="na">max</span><span class="o">((</span><span class="kt">int</span><span class="o">)</span> <span class="o">(</span><span class="n">m</span><span class="o">.</span><span class="na">size</span><span class="o">()</span> <span class="o">/</span> <span class="n">DEFAULT_LOAD_FACTOR</span><span class="o">)</span> <span class="o">+</span> <span class="mi">1</span><span class="o">,</span>
-                      <span class="n">DEFAULT_INITIAL_CAPACITY</span><span class="o">),</span> <span class="n">DEFAULT_LOAD_FACTOR</span><span class="o">);</span>
-        <span class="n">inflateTable</span><span class="o">(</span><span class="n">threshold</span><span class="o">);</span>
-        <span class="n">putAllForCreate</span><span class="o">(</span><span class="n">m</span><span class="o">);</span>
-    <span class="o">}</span>
+    <span class="kr">public</span> <span class="nx">HashMap</span><span class="p">(</span><span class="nx">Map</span><span class="cp">&lt;?</span> <span class="k">extends</span> <span class="nx">K</span><span class="p">,</span> <span class="o">?</span> <span class="k">extends</span> <span class="nx">V</span><span class="o">&gt;</span> <span class="nx">m</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">(</span><span class="nx">Math</span><span class="o">.</span><span class="nb">max</span><span class="p">((</span><span class="nx">int</span><span class="p">)</span> <span class="p">(</span><span class="nx">m</span><span class="o">.</span><span class="nx">size</span><span class="p">()</span> <span class="o">/</span> <span class="nx">DEFAULT_LOAD_FACTOR</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                      <span class="nx">DEFAULT_INITIAL_CAPACITY</span><span class="p">),</span> <span class="nx">DEFAULT_LOAD_FACTOR</span><span class="p">);</span>
+        <span class="nx">inflateTable</span><span class="p">(</span><span class="nx">threshold</span><span class="p">);</span>
+        <span class="nx">putAllForCreate</span><span class="p">(</span><span class="nx">m</span><span class="p">);</span>
+    <span class="p">}</span>
 </pre></div>
 
 
@@ -395,76 +394,73 @@ by <a class="url fn" href="/author/tuyc.html">tuyc</a>
 <li>可以指定初始容量，以及装载因子。一般情况都会使用默认的装载因子。</li>
 </ul>
 <p>下面来Look下put（新增和修改）、remove、get源码：</p>
-<div class="highlight"><pre><span></span><span class="kd">public</span> <span class="n">V</span> <span class="nf">put</span><span class="o">(</span><span class="n">K</span> <span class="n">key</span><span class="o">,</span> <span class="n">V</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
-    <span class="k">if</span> <span class="o">(</span><span class="n">table</span> <span class="o">==</span> <span class="n">EMPTY_TABLE</span><span class="o">)</span> <span class="o">{</span>
-        <span class="n">inflateTable</span><span class="o">(</span><span class="n">threshold</span><span class="o">);</span>
-    <span class="o">}</span>
-    <span class="k">if</span> <span class="o">(</span><span class="n">key</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span>
-        <span class="k">return</span> <span class="n">putForNullKey</span><span class="o">(</span><span class="n">value</span><span class="o">);</span>
-    <span class="kt">int</span> <span class="n">hash</span> <span class="o">=</span> <span class="n">sun</span><span class="o">.</span><span class="na">misc</span><span class="o">.</span><span class="na">Hashing</span><span class="o">.</span><span class="na">singleWordWangJenkinsHash</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
-    <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">indexFor</span><span class="o">(</span><span class="n">hash</span><span class="o">,</span> <span class="n">table</span><span class="o">.</span><span class="na">length</span><span class="o">);</span>
-    <span class="k">for</span> <span class="o">(</span><span class="n">HashMapEntry</span><span class="o">&lt;</span><span class="n">K</span><span class="o">,</span><span class="n">V</span><span class="o">&gt;</span> <span class="n">e</span> <span class="o">=</span> <span class="n">table</span><span class="o">[</span><span class="n">i</span><span class="o">];</span> <span class="n">e</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">;</span> <span class="n">e</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="na">next</span><span class="o">)</span> <span class="o">{</span>
-        <span class="n">Object</span> <span class="n">k</span><span class="o">;</span>
-        <span class="k">if</span> <span class="o">(</span><span class="n">e</span><span class="o">.</span><span class="na">hash</span> <span class="o">==</span> <span class="n">hash</span> <span class="o">&amp;&amp;</span> <span class="o">((</span><span class="n">k</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="na">key</span><span class="o">)</span> <span class="o">==</span> <span class="n">key</span> <span class="o">||</span> <span class="n">key</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">k</span><span class="o">)))</span> <span class="o">{</span>
-            <span class="n">V</span> <span class="n">oldValue</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="na">value</span><span class="o">;</span>
-            <span class="n">e</span><span class="o">.</span><span class="na">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">;</span>
-            <span class="n">e</span><span class="o">.</span><span class="na">recordAccess</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
-            <span class="k">return</span> <span class="n">oldValue</span><span class="o">;</span>
-        <span class="o">}</span>
-    <span class="o">}</span>
+<div class="highlight"><pre><span></span>public V put(K key, V value) {
+    if (table == EMPTY_TABLE) {
+        inflateTable(threshold);
+    }
+    if (key == null)
+        return putForNullKey(value);
+    int hash = sun.misc.Hashing.singleWordWangJenkinsHash(key);
+    int i = indexFor(hash, table.length);
+    for (HashMapEntry&lt;K,V&gt; e = table[i]; e != null; e = e.next) {
+        Object k;
+        if (e.hash == hash &amp;&amp; ((k = e.key) == key || key.equals(k))) {
+            V oldValue = e.value;
+            e.value = value;
+            e.recordAccess(this);
+            return oldValue;
+        }
+    }
 
-    <span class="n">modCount</span><span class="o">++;</span>
-    <span class="n">addEntry</span><span class="o">(</span><span class="n">hash</span><span class="o">,</span> <span class="n">key</span><span class="o">,</span> <span class="n">value</span><span class="o">,</span> <span class="n">i</span><span class="o">);</span>
-    <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
-<span class="o">}</span>
+    modCount++;
+    addEntry(hash, key, value, i);
+    return null;
+}
 
-<span class="kd">static</span> <span class="kt">int</span> <span class="nf">indexFor</span><span class="o">(</span><span class="kt">int</span> <span class="n">h</span><span class="o">,</span> <span class="kt">int</span> <span class="n">length</span><span class="o">)</span> <span class="o">{</span>
-       <span class="k">return</span> <span class="n">h</span> <span class="o">&amp;</span> <span class="o">(</span><span class="n">length</span><span class="o">-</span><span class="mi">1</span><span class="o">);</span>
-<span class="o">}</span>
+static int indexFor(int h, int length) {
+       return h &amp; (length-1);
+}
 
-<span class="kt">void</span> <span class="nf">addEntry</span><span class="o">(</span><span class="kt">int</span> <span class="n">hash</span><span class="o">,</span> <span class="n">K</span> <span class="n">key</span><span class="o">,</span> <span class="n">V</span> <span class="n">value</span><span class="o">,</span> <span class="kt">int</span> <span class="n">bucketIndex</span><span class="o">)</span> <span class="o">{</span>
-        <span class="k">if</span> <span class="o">((</span><span class="n">size</span> <span class="o">&gt;=</span> <span class="n">threshold</span><span class="o">)</span> <span class="o">&amp;&amp;</span> <span class="o">(</span><span class="kc">null</span> <span class="o">!=</span> <span class="n">table</span><span class="o">[</span><span class="n">bucketIndex</span><span class="o">]))</span> <span class="o">{</span>
-            <span class="n">resize</span><span class="o">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">table</span><span class="o">.</span><span class="na">length</span><span class="o">);</span>
-            <span class="n">hash</span> <span class="o">=</span> <span class="o">(</span><span class="kc">null</span> <span class="o">!=</span> <span class="n">key</span><span class="o">)</span> <span class="o">?</span> <span class="n">sun</span><span class="o">.</span><span class="na">misc</span><span class="o">.</span><span class="na">Hashing</span><span class="o">.</span><span class="na">singleWordWangJenkinsHash</span><span class="o">(</span><span class="n">key</span><span class="o">)</span> <span class="o">:</span> <span class="mi">0</span><span class="o">;</span>
-            <span class="n">bucketIndex</span> <span class="o">=</span> <span class="n">indexFor</span><span class="o">(</span><span class="n">hash</span><span class="o">,</span> <span class="n">table</span><span class="o">.</span><span class="na">length</span><span class="o">);</span>
-        <span class="o">}</span>
-        <span class="n">createEntry</span><span class="o">(</span><span class="n">hash</span><span class="o">,</span> <span class="n">key</span><span class="o">,</span> <span class="n">value</span><span class="o">,</span> <span class="n">bucketIndex</span><span class="o">);</span>
-    <span class="o">}</span>
+void addEntry(int hash, K key, V value, int bucketIndex) {
+        if ((size &gt;= threshold) &amp;&amp; (null != table[bucketIndex])) {
+            resize(2 * table.length);
+            hash = (null != key) ? sun.misc.Hashing.singleWordWangJenkinsHash(key) : 0;
+            bucketIndex = indexFor(hash, table.length);
+        }
+        createEntry(hash, key, value, bucketIndex);
+    }
 
-<span class="kt">void</span> <span class="nf">createEntry</span><span class="o">(</span><span class="kt">int</span> <span class="n">hash</span><span class="o">,</span> <span class="n">K</span> <span class="n">key</span><span class="o">,</span> <span class="n">V</span> <span class="n">value</span><span class="o">,</span> <span class="kt">int</span> <span class="n">bucketIndex</span><span class="o">)</span> <span class="o">{</span>
-        <span class="n">HashMapEntry</span><span class="o">&lt;</span><span class="n">K</span><span class="o">,</span><span class="n">V</span><span class="o">&gt;</span> <span class="n">e</span> <span class="o">=</span> <span class="n">table</span><span class="o">[</span><span class="n">bucketIndex</span><span class="o">];</span>
-        <span class="n">table</span><span class="o">[</span><span class="n">bucketIndex</span><span class="o">]</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMapEntry</span><span class="o">&lt;&gt;(</span><span class="n">hash</span><span class="o">,</span> <span class="n">key</span><span class="o">,</span> <span class="n">value</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
-        <span class="n">size</span><span class="o">++;</span>
-<span class="o">}</span>
+void createEntry(int hash, K key, V value, int bucketIndex) {
+        HashMapEntry&lt;K,V&gt; e = table[bucketIndex];
+        table[bucketIndex] = new HashMapEntry&lt;&gt;(hash, key, value, e);
+        size++;
+}
 
-<span class="kd">public</span> <span class="n">V</span> <span class="nf">remove</span><span class="o">(</span><span class="n">Object</span> <span class="n">key</span><span class="o">)</span> <span class="o">{</span>
-        <span class="n">Entry</span><span class="o">&lt;</span><span class="n">K</span><span class="o">,</span><span class="n">V</span><span class="o">&gt;</span> <span class="n">e</span> <span class="o">=</span> <span class="n">removeEntryForKey</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
-        <span class="k">return</span> <span class="o">(</span><span class="n">e</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">?</span> <span class="kc">null</span> <span class="o">:</span> <span class="n">e</span><span class="o">.</span><span class="na">getValue</span><span class="o">());</span>
-<span class="o">}</span>
+public V remove(Object key) {
+        Entry&lt;K,V&gt; e = removeEntryForKey(key);
+        return (e == null ? null : e.getValue());
+}
 
-<span class="kd">public</span> <span class="n">V</span> <span class="nf">get</span><span class="o">(</span><span class="n">Object</span> <span class="n">key</span><span class="o">)</span> <span class="o">{</span>
-        <span class="k">if</span> <span class="o">(</span><span class="n">key</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span>
-            <span class="k">return</span> <span class="n">getForNullKey</span><span class="o">();</span>
-        <span class="n">Entry</span><span class="o">&lt;</span><span class="n">K</span><span class="o">,</span><span class="n">V</span><span class="o">&gt;</span> <span class="n">entry</span> <span class="o">=</span> <span class="n">getEntry</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
+public V get(Object key) {
+        if (key == null)
+            return getForNullKey();
+        Entry&lt;K,V&gt; entry = getEntry(key);
 
-        <span class="k">return</span> <span class="kc">null</span> <span class="o">==</span> <span class="n">entry</span> <span class="o">?</span> <span class="kc">null</span> <span class="o">:</span> <span class="n">entry</span><span class="o">.</span><span class="na">getValue</span><span class="o">();</span>
-<span class="o">}</span>
+        return null == entry ? null : entry.getValue();
+}
 </pre></div>
 
 
 <ul>
 <li>put函数</li>
 </ul>
-<p><code>java
-  if (key == null)
+<p><code>if (key == null)
           return putForNullKey(value);</code></p>
 <p>由此可知key可以为空。</p>
-<p><code>java
-  int hash = sun.misc.Hashing.singleWordWangJenkinsHash(key);
+<p><code>int hash = sun.misc.Hashing.singleWordWangJenkinsHash(key);
   int i = indexFor(hash, table.length);</code></p>
 <p>hash的的算法不用care，只要理解根据key得到hash值即可；再根据hash值，<code>indexFor(int h, int length)</code>计算桶（数组）的下标；这一步任务就是定位桶的下标。</p>
-<p><code>java
-  for (HashMapEntry&lt;K,V&gt; e = table[i]; e != null; e = e.next) {
+<p><code>for (HashMapEntry&lt;K,V&gt; e = table[i]; e != null; e = e.next) {
           Object k;
           if (e.hash == hash &amp;&amp; ((k = e.key) == key || key.equals(k))) {
               V oldValue = e.value;
@@ -474,11 +470,9 @@ by <a class="url fn" href="/author/tuyc.html">tuyc</a>
           }
       }</code></p>
 <p>这里可以发现for循环初始值HashMapEntry<K,V> e=table[i]（i是上一步计算出的下标），HashMapEntry是一个链表结点，并拥有next结点；滑动链表结点，依次比较，当<code>e.hash == hash &amp;&amp; ((k = e.key) == key || key.equals(k))</code>条件满足就找到了相同的key，进行修改操作，否则就进行增加操作，如下：</p>
-<p><code>java
-  addEntry(hash, key, value, i);</code></p>
+<p><code>addEntry(hash, key, value, i);</code></p>
 <p>最后会执行到：</p>
-<p><code>java
-  void createEntry(int hash, K key, V value, int bucketIndex) {
+<p><code>void createEntry(int hash, K key, V value, int bucketIndex) {
           HashMapEntry&lt;K,V&gt; e = table[bucketIndex];
           table[bucketIndex] = new HashMapEntry&lt;&gt;(hash, key, value, e);
           size++;
@@ -487,7 +481,7 @@ by <a class="url fn" href="/author/tuyc.html">tuyc</a>
 <ul>
 <li>remove函数</li>
 </ul>
-<p>```java
+<p>```
   final Entry<K,V> removeEntryForKey(Object key) {
           if (size == 0) {
               return null;
@@ -525,7 +519,7 @@ by <a class="url fn" href="/author/tuyc.html">tuyc</a>
 <li>get函数</li>
 </ul>
 <p>核心函数是：</p>
-<p>```java
+<p>```
   final Entry<K,V> getEntry(Object key) {
           if (size == 0) {
               return null;
