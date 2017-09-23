@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>tuyc - tuyc</title>
+    <title>tuyc - APP自动化测试</title>
     <meta name="description" content="">
     <meta name="author" content="tuyc">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -484,137 +484,11 @@ ConnectionRefusedError: [Errno 61] Connection refused
         <hr />
     </div>
 		
-
- 
-        
-
- 
-
-    <div class='article'>
-        <a href="/yuan-ma-zou-du/my-super-collection.html"><h2>Android常用数据结构解析</h2></a>
-        <div class= "well small"> 日 06 八月 2017
-
-by <a class="url fn" href="/author/tuyc.html">tuyc</a>
- 
-
-
- </div>
-        <div class="summary"><p>集合解析</p> <a class="btn btn-info xsmall" href="/yuan-ma-zou-du/my-super-collection.html">read more</a></div>
-    </div>	
-				
-
- 
-        
-
- 
-
-    <div class='article'>
-        <a href="/android-animation/yeyu_animation_vo_high.html"><h2>Android ValueAnimator和ObjectAnimator高级用法</h2></a>
-        <div class= "well small"> 六 10 十二月 2016
-
-by <a class="url fn" href="/author/tuyc.html">tuyc</a>
- 
-
-
- </div>
-        <div class="summary"><h3>ValueAnimator高级用法</h3>
-<p>​       先了解TypeEvaluator用法：</p>
-<p>​      TypeEvaluator的作用是什么？其实，就是告诉动画系统如何从初始值到结束值。比如ValueAnimator.ofFloat()，系统默认有一个FloatEvaluator，实现了初始到结束值之间的平滑过渡。FloatEvaluator源码如下：</p>
-<div class="highlight"><pre><span></span><span class="kd">public</span> <span class="kd">class</span> <span class="nc">FloatEvaluator</span> <span class="kd">implements</span> <span class="n">TypeEvaluator</span> <span class="o">{</span>
-    <span class="kd">public</span> <span class="n">Object</span> <span class="nf">evaluate</span><span class="o">(</span><span class="kt">float</span> <span class="n">fraction</span><span class="o">,</span> <span class="n">Object</span> <span class="n">startValue</span><span class="o">,</span> <span class="n">Object</span> <span class="n">endValue</span><span class="o">)</span> <span class="o">{</span>
-        <span class="kt">float</span> <span class="n">startFloat</span> <span class="o">=</span> <span class="o">((</span><span class="n">Number</span><span class="o">)</span> <span class="n">startValue</span><span class="o">).</span><span class="na">floatValue</span><span class="o">();</span>
-        <span class="k">return</span> <span class="n">startFloat</span> <span class="o">+</span> <span class="n">fraction</span> <span class="o">*</span> <span class="o">(((</span><span class="n">Number</span><span class="o">)</span> <span class="n">endValue</span><span class="o">).</span><span class="na">floatValue</span><span class="o">()</span> <span class="o">-</span> <span class="n">startFloat</span><span class="o">);</span>
-    <span class="o">}</span>
-<span class="o">}</span>
-</pre></div>
-
-
-<p>可以看到FloatEvaluator实现了TypeEvaluator接口，重写了evaluate方法。第一个参数fraction非常重要，这个参数用于表示动画的完成度的。</p>
-<p>我们可以实现一个自己的TypeEvaluator，for example：</p>
-<div class="highlight"><pre><span></span><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Love</span> <span class="o">{</span>
-    <span class="kd">public</span> <span class="kt">float</span> <span class="n">degree</span><span class="o">;</span>
-    <span class="kd">public ...</span></pre></div> <a class="btn btn-info xsmall" href="/android-animation/yeyu_animation_vo_high.html">read more</a></div>
-    </div>	
-				
-
- 
-        
-
- 
-
-    <div class='article'>
-        <a href="/android-material-design/yeyu_md_ TestCoordinatorLayout.html"><h2>TestCoordinatorLayout相关控件使用姿势</h2></a>
-        <div class= "well small"> 六 10 十二月 2016
-
-by <a class="url fn" href="/author/tuyc.html">tuyc</a>
- 
-
-
- </div>
-        <div class="summary"><p>[TOC]</p>
-<h2>TestCoordinatorLayout分析</h2>
-<p><a href="https://github.com/SpikeKing/TestCoordinatorLayout">github地址：https://github.com/SpikeKing/TestCoordinatorLayout</a></p>
-<p><a href="http://www.wangchenlong.org/2016/03/22/1603/228-coordinator-layout-first/">源码解析示例</a></p>
-<h5>本文只对该项目所用到的控件使用方式关系到的知识点进行整合</h5>
-<h3>效果图</h3>
-<p><img alt="" src="https://github.com/tuyc/tuyc.github.io/blob/master/images/animation/animation_testcoordinatorlayout.gif?raw=true" /></p>
-<h3>主要文件和源码</h3>
-<ul>
-<li>MainActivity.java</li>
-<li>AvatarImageBehavior.java</li>
-<li>activity_main.xml</li>
-</ul>
-<h4>MainActivity.java</h4>
-<div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nn">spikeking.github.com.testcoordinatorlayout</span><span class="o">;</span>
-
-<span class="kn">import</span> <span class="nn">android.os.Bundle</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">android.support.design.widget.AppBarLayout</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">android.support.design.widget.CollapsingToolbarLayout</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">android.support.v7.app.AppCompatActivity</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">android.support ...</span></pre></div> <a class="btn btn-info xsmall" href="/android-material-design/yeyu_md_ TestCoordinatorLayout.html">read more</a></div>
-    </div>	
-				
-
- 
-        
-
- 
-
-    <div class='article'>
-        <a href="/"><h2>个人简介</h2></a>
-        <div class= "well small"> 二 06 九月 2016
-
-by <a class="url fn" href="/author/tuyc.html">tuyc</a>
- 
-
-
- </div>
-        <div class="summary"><p>About me</p> <a class="btn btn-info xsmall" href="/">read more</a></div>
-    </div>	
-				
-
- 
-        
-
- 
-
-    <div class='article'>
-        <a href="/xian-cheng/my-super-post.html"><h2>线程池</h2></a>
-        <div class= "well small"> 二 06 九月 2016
-
-by <a class="url fn" href="/author/tuyc.html">tuyc</a>
- 
-
-
- </div>
-        <div class="summary"><p>线程摘要</p> <a class="btn btn-info xsmall" href="/xian-cheng/my-super-post.html">read more</a></div>
-    </div>	
-				
 <div class="pagination">
 <ul>
     <li class="prev disabled"><a href="#">&larr; Previous</a></li>
 
-    <li class="active"><a href="/author/tuyc.html">1</a></li>
+    <li class="active"><a href="/appzi-dong-hua-ce-shi/index.html">1</a></li>
 
     <li class="next disabled"><a href="#">&rarr; Next</a></li>
 
